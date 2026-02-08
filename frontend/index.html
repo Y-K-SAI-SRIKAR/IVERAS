@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./PADMA VYUHA.jpeg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PADMA VYUHA</title>
+
+    <!-- ================= LOADER STYLES ================= -->
+    <style>
+      body {
+        margin: 0;
+        background: black;
+      }
+
+      /* Loader wrapper */
+      .loading {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: black;
+        z-index: 9999;
+      }
+
+      svg {
+        width: 80px;
+        height: 60px;
+      }
+
+      polyline {
+        fill: none;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      #back {
+        stroke: #333;
+      }
+
+      #front {
+        stroke: #ffffff;
+        stroke-dasharray: 48, 144;
+        stroke-dashoffset: 192;
+        animation: dash 1.4s linear infinite;
+      }
+
+      @keyframes dash {
+        0% {
+          stroke-dashoffset: 192;
+        }
+        100% {
+          stroke-dashoffset: 0;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ================= LOADER ================= -->
+    <div id="loader" class="loading">
+      <svg viewBox="0 0 64 48">
+        <polyline
+          points="0.157 23.954, 14 23.954, 21.843 48, 43 0, 50 24, 64 24"
+          id="back"
+        ></polyline>
+        <polyline
+          points="0.157 23.954, 14 23.954, 21.843 48, 43 0, 50 24, 64 24"
+          id="front"
+        ></polyline>
+      </svg>
+    </div>
+
+    <!-- ================= REACT ROOT ================= -->
+    <div id="root"></div>
+
+    <script type="module" src="/src/main.jsx"></script>
+
+    <!-- ================= HIDE LOADER WHEN APP LOADS ================= -->
+    <script>
+  window.addEventListener("load", () => {
+    const loader = document.getElementById("loader");
+
+    // 🔥 minimum time loader stays visible (ms)
+    const MIN_TIME = 900;
+
+    setTimeout(() => {
+      loader.style.opacity = "0";   // fade
+      setTimeout(() => loader.remove(), 500); // remove after fade
+    }, MIN_TIME);
+  });
+</script>
+  </body>
+</html>
