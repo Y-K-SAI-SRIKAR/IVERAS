@@ -1,0 +1,241 @@
+:root {
+  --neon-color: #00ffcc;
+  --bg-dark: #000;
+  --card-bg: #111;
+  --text-grey: #a0a0a0;
+}
+
+.lifecycle-section {
+  background: var(--bg-dark);
+  padding: 80px 20px;
+  color: white;
+  position: relative;
+}
+
+.lifecycle-title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 80px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.highlight {
+  color: var(--neon-color);
+  text-shadow: 0 0 12px rgba(0, 255, 204, 0.5);
+}
+
+.timeline-container {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Center Line */
+.center-line-bg {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 100%;
+  background: #333;
+  border-radius: 2px;
+}
+
+.center-line-progress {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  top: 0;
+  background: var(--neon-color);
+  box-shadow:
+    0 0 10px var(--neon-color),
+    0 0 25px var(--neon-color);
+  border-radius: 2px;
+  transition: height 0.15s linear;
+}
+
+/* Timeline Items */
+.timeline-item {
+  width: 50%;
+  padding: 20px 40px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.timeline-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.timeline-item.left {
+  align-self: flex-start;
+  text-align: right;
+}
+
+.timeline-item.right {
+  align-self: flex-end;
+  text-align: left;
+}
+
+/* Icons */
+.timeline-icon {
+  position: absolute;
+  top: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #222;
+  border: 2px solid #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  transition: all 0.4s ease;
+  z-index: 2;
+}
+
+.timeline-item.left .timeline-icon {
+  right: -25px;
+}
+
+.timeline-item.right .timeline-icon {
+  left: -25px;
+}
+
+.timeline-icon.active {
+  background: var(--neon-color);
+  color: #000;
+  border-color: #fff;
+  box-shadow: 0 0 20px var(--neon-color);
+  transform: scale(1.1);
+}
+
+/* Content */
+.timeline-content {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.timeline-content:hover {
+  transform: scale(1.02);
+  border-color: var(--neon-color);
+}
+
+.timeline-content h3 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+}
+
+.timeline-content p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-grey);
+  line-height: 1.5;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .center-line-bg,
+  .center-line-progress {
+    left: 24px;
+  }
+
+  .timeline-item {
+    width: 100%;
+    padding-left: 70px;
+    padding-right: 10px;
+    text-align: left;
+  }
+
+  .timeline-icon {
+    left: -2px !important;
+    right: auto;
+  }
+}
+
+.lifecycle-section {
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.55),
+    rgba(0,0,0,0.75)
+  );
+}
+
+
+.timeline-item {
+  opacity: 0.85;              /* readable by default */
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.timeline-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+.timeline-content {
+  background: #141414;        /* solid dark */
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow:0 8px 30px rgba(0,0,0,0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;      /* horizontal centering */
+  justify-content: center;  /* vertical centering */
+  text-align: center;
+
+  transition: transform 0.3s ease, border-color 0.3s ease;
+  
+}
+
+.timeline-content h3 {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.timeline-content p {
+  color: #dcdcdc;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.timeline-icon {
+  background: #1e1e1e;
+  border: 2px solid #888;
+  color: #fff;
+  opacity: 1;
+}
+
+.timeline-icon.active {
+  background: var(--neon-color);
+  color: #000;
+  box-shadow: 0 0 30px var(--neon-color);
+}
+
+.timeline-content h3 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.timeline-content p {
+  margin: 0;
+  max-width: 90%;
+  font-size: 0.95rem;
+  color: #dcdcdc;
+  font-weight: 500;
+  line-height: 1.6;
+}
