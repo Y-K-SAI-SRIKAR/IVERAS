@@ -1,8 +1,24 @@
-import { useState } from 'react';
+// RegisterPage.jsx
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Silk from '../PagesUI/Silk.jsx';
+import CustomDropdown from '../PagesUI/CustomDropdown.jsx';
+import BlurText from '../PagesUI/BlurText.jsx';
+import CurvedLoop from '../PagesUI/CurvedLoop.jsx';
 import './RegisterPage.css';
 
-function RegisterPage() {
+const bloodGroupOptions = [
+  'A+',
+  'A-',
+  'B+',
+  'B-',
+  'AB+',
+  'AB-',
+  'O+',
+  'O-',
+];
+
+const RegisterPage = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -10,13 +26,50 @@ function RegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
+    userType: 'Public',
+    vehicleNumber: '',
+    iotDeviceId: '',
+    emergencyPhone: '',
+    contactNumber: '',
+    ambulanceNumber: '',
+    driverId: '',
+    ambulanceImage: null,
+    idCardImage: null,
+    bloodGroup: '',
+    allergies: '',
+    captcha: '',
   });
 
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, files } = e.target;
+
+    if (name === 'ambulanceImage' || name === 'idCardImage') {
+      const file = files && files[0] ? files[0] : null;
+      setForm((prev) => ({ ...prev, [name]: file }));
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+      return;
+    }
+
+    if (name === 'userType') {
+      const newType = value;
+      setForm((prev) => ({
+        ...prev,
+        userType: newType,
+        vehicleNumber: newType === 'Public' ? prev.vehicleNumber : '',
+        emergencyPhone: newType === 'Public' ? prev.emergencyPhone : '',
+        contactNumber: newType === 'Public' ? prev.contactNumber : '',
+        ambulanceNumber: newType === 'Emergency Assistant' ? prev.ambulanceNumber : '',
+        driverId: newType === 'Emergency Assistant' ? prev.driverId : '',
+        ambulanceImage: newType === 'Emergency Assistant' ? prev.ambulanceImage : null,
+        idCardImage: newType === 'Emergency Assistant' ? prev.idCardImage : null,
+      }));
+      setErrors({});
+      return;
+    }
+
     setForm((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: '' }));
   };
@@ -25,6 +78,7 @@ function RegisterPage() {
     const newErrors = {};
 
     if (!form.name.trim()) newErrors.name = 'Name is required';
+
     if (!form.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
@@ -43,6 +97,48 @@ function RegisterPage() {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
+    // IoT device is required only for Public
+    if (form.userType === 'Public' && !form.iotDeviceId.trim()) {
+      newErrors.iotDeviceId = 'IoT device ID is required';
+    }
+
+    if (form.userType === 'Public') {
+      if (!form.vehicleNumber.trim()) {
+        newErrors.vehicleNumber = 'Vehicle number is required';
+      }
+      if (!form.emergencyPhone.trim()) {
+        newErrors.emergencyPhone = 'Emergency phone number is required';
+      }
+      if (!form.contactNumber.trim()) {
+        newErrors.contactNumber = 'Contact number is required';
+      }
+    }
+
+    if (form.userType === 'Emergency Assistant') {
+      if (!form.ambulanceNumber.trim()) {
+        newErrors.ambulanceNumber = 'Ambulance number is required';
+      }
+      if (!form.driverId.trim()) {
+        newErrors.driverId = 'Driver ID is required';
+      }
+      if (!form.ambulanceImage) {
+        newErrors.ambulanceImage = 'Ambulance image is required';
+      }
+      if (!form.idCardImage) {
+        newErrors.idCardImage = 'ID card image is required';
+      }
+    }
+
+    if (!form.bloodGroup.trim()) {
+      newErrors.bloodGroup = 'Blood group is required';
+    }
+
+    if (!form.captcha.trim()) {
+      newErrors.captcha = 'Captcha is required';
+    } else if (form.captcha.trim().toUpperCase() !== 'IVERAS') {
+      newErrors.captcha = 'Captcha does not match';
+    }
+
     return newErrors;
   };
 
@@ -58,17 +154,11 @@ function RegisterPage() {
     setSubmitting(true);
 
     try {
-      // TODO: Call your backend API here
       console.log('Registering user:', form);
-
-      // Simulate delay
       await new Promise((res) => setTimeout(res, 800));
-
-      // After successful registration, go to login or home
       navigate('/LoginPage');
     } catch (err) {
       console.error(err);
-      // Example: setErrors({ api: 'Something went wrong, please try again.' });
     } finally {
       setSubmitting(false);
     }
@@ -78,244 +168,385 @@ function RegisterPage() {
     navigate('/LoginPage');
   };
 
+  const isPublic = form.userType === 'Public';
+  const isEmergencyAssistant = form.userType === 'Emergency Assistant';
+
+  const centeredInputStyle = { textAlign: 'center' };
+
+  const handleAnimationComplete = () => {
+    console.log('Animation completed!');
+  };
+
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#020617',
-        color: '#e5e7eb',
-        padding: '24px',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '420px',
-          background: '#020617',
-          borderRadius: '16px',
-          border: '1px solid #1f2937',
-          padding: '24px 28px 28px',
-          boxShadow: '0 20px 45px rgba(0,0,0,0.6)',
-        }}
-      >
-        <h1
-          style={{
-            fontSize: '1.8rem',
-            fontWeight: 800,
-            marginBottom: '4px',
-            textAlign: 'center',
-          }}
-        >
-          Create your account
-        </h1>
-        <p
-          style={{
-            fontSize: '0.9rem',
-            color: '#9ca3af',
-            textAlign: 'center',
-            marginBottom: '20px',
-          }}
-        >
-          Join IVERAS and be part of the mission to save lives on the road.
-        </p>
+    <div className="register-page-root">
+      <div className="register-silk-bg">
+        <Silk
+          speed={5}
+          scale={1}
+          color="#5b25a1"
+          noiseIntensity={1.5}
+          rotation={0}
+        />
+      </div>
 
-        {errors.api && (
+      <div className="register-page">
+        <div className="register-content">
           <div
-            style={{
-              marginBottom: '10px',
-              padding: '8px 10px',
-              borderRadius: '8px',
-              background: '#451a1a',
-              color: '#fecaca',
-              fontSize: '0.85rem',
-            }}
+            className="register-heading-wrapper"
+            style={{ marginBottom: '32px' }}
           >
-            {errors.api}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} noValidate>
-          {/* Name */}
-          <div style={{ marginBottom: '12px' }}>
-            <label
-              htmlFor="name"
-              style={{ display: 'block', fontSize: '0.85rem', marginBottom: '4px' }}
-            >
-              Full Name
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="e.g. Srikar "
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: '8px',
-                border: `1px solid ${errors.name ? '#b91c1c' : '#374151'}`,
-                background: '#020617',
-                color: '#e5e7eb',
-                outline: 'none',
-                fontSize: '0.9rem',
-              }}
+            <BlurText
+              text="JOIN YOUR HANDS WITH IVERAS"
+              delay={200}
+              animateBy="letters"
+              direction="top"
+              onAnimationComplete={handleAnimationComplete}
+              className="register-heading-title"
             />
-            {errors.name && (
-              <span style={{ color: '#fca5a5', fontSize: '0.8rem' }}>{errors.name}</span>
-            )}
           </div>
 
-          {/* Email */}
-          <div style={{ marginBottom: '12px' }}>
-            <label
-              htmlFor="email"
-              style={{ display: 'block', fontSize: '0.85rem', marginBottom: '4px' }}
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: '8px',
-                border: `1px solid ${errors.email ? '#b91c1c' : '#374151'}`,
-                background: '#020617',
-                color: '#e5e7eb',
-                outline: 'none',
-                fontSize: '0.9rem',
-              }}
-            />
-            {errors.email && (
-              <span style={{ color: '#fca5a5', fontSize: '0.8rem' }}>{errors.email}</span>
-            )}
+          <div className="register-card-block">
+            <div className="register-form-wrapper">
+              <form className="form" onSubmit={handleSubmit} noValidate>
+                <p id="heading">GET ACCESS</p>
+
+                <div className="field field-select">
+                  <CustomDropdown
+                    name="userType"
+                    value={form.userType}
+                    onChange={handleChange}
+                    options={['Public', 'Emergency Assistant']}
+                  />
+                </div>
+                {errors.userType && (
+                  <span className="register-error-text">{errors.userType}</span>
+                )}
+
+                <div className="field">
+                  <input
+                    type="text"
+                    className="input-field"
+                    name="name"
+                    placeholder="FULL NAME"
+                    autoComplete="off"
+                    value={form.name}
+                    onChange={handleChange}
+                    style={centeredInputStyle}
+                  />
+                </div>
+                {errors.name && (
+                  <span className="register-error-text">{errors.name}</span>
+                )}
+
+                <div className="field">
+                  <input
+                    type="email"
+                    className="input-field"
+                    name="email"
+                    placeholder="EMAIL ID"
+                    autoComplete="off"
+                    value={form.email}
+                    onChange={handleChange}
+                    style={centeredInputStyle}
+                  />
+                </div>
+                {errors.email && (
+                  <span className="register-error-text">{errors.email}</span>
+                )}
+
+                {isPublic && (
+                  <div className="field">
+                    <input
+                      type="text"
+                      className="input-field"
+                      name="iotDeviceId"
+                      placeholder="IOT DEVICE ID"
+                      autoComplete="off"
+                      value={form.iotDeviceId}
+                      onChange={handleChange}
+                      style={centeredInputStyle}
+                    />
+                  </div>
+                )}
+                {errors.iotDeviceId && (
+                  <span className="register-error-text">
+                    {errors.iotDeviceId}
+                  </span>
+                )}
+
+                {isPublic && (
+                  <>
+                    <div className="field">
+                      <input
+                        type="text"
+                        className="input-field"
+                        name="vehicleNumber"
+                        placeholder="VEHICLE NUMBER (E.g : AP09AB1234)"
+                        autoComplete="off"
+                        value={form.vehicleNumber}
+                        onChange={handleChange}
+                        style={centeredInputStyle}
+                      />
+                    </div>
+                    {errors.vehicleNumber && (
+                      <span className="register-error-text">
+                        {errors.vehicleNumber}
+                      </span>
+                    )}
+
+                    <div className="field">
+                      <input
+                        type="tel"
+                        className="input-field"
+                        name="emergencyPhone"
+                        placeholder="EMERGENCY PHONE NUMBER"
+                        autoComplete="off"
+                        value={form.emergencyPhone}
+                        onChange={handleChange}
+                        style={centeredInputStyle}
+                      />
+                    </div>
+                    {errors.emergencyPhone && (
+                      <span className="register-error-text">
+                        {errors.emergencyPhone}
+                      </span>
+                    )}
+
+                    <div className="field">
+                      <input
+                        type="tel"
+                        className="input-field"
+                        name="contactNumber"
+                        placeholder="CONTACT NUMBER"
+                        autoComplete="off"
+                        value={form.contactNumber}
+                        onChange={handleChange}
+                        style={centeredInputStyle}
+                      />
+                    </div>
+                    {errors.contactNumber && (
+                      <span className="register-error-text">
+                        {errors.contactNumber}
+                      </span>
+                    )}
+                  </>
+                )}
+
+                {isEmergencyAssistant && (
+                  <>
+                    <div className="field">
+                      <input
+                        type="text"
+                        className="input-field"
+                        name="ambulanceNumber"
+                        placeholder="AMBULANCE NUMBER"
+                        autoComplete="off"
+                        value={form.ambulanceNumber}
+                        onChange={handleChange}
+                        style={centeredInputStyle}
+                      />
+                    </div>
+                    {errors.ambulanceNumber && (
+                      <span className="register-error-text">
+                        {errors.ambulanceNumber}
+                      </span>
+                    )}
+
+                    <div className="field">
+                      <input
+                        type="text"
+                        className="input-field"
+                        name="driverId"
+                        placeholder="DRIVER ID"
+                        autoComplete="off"
+                        value={form.driverId}
+                        onChange={handleChange}
+                        style={centeredInputStyle}
+                      />
+                    </div>
+                    {errors.driverId && (
+                      <span className="register-error-text">
+                        {errors.driverId}
+                      </span>
+                    )}
+
+                    <label className="register-file-label">
+                      AMBULANCE IMAGE
+                    </label>
+                    <div className="field">
+                      <input
+                        type="file"
+                        className="input-field register-file-input"
+                        name="ambulanceImage"
+                        accept="image/*"
+                        onChange={handleChange}
+                        title="Upload clear photo of the ambulance"
+                      />
+                    </div>
+                    {errors.ambulanceImage && (
+                      <span className="register-error-text">
+                        {errors.ambulanceImage}
+                      </span>
+                    )}
+
+                    <label className="register-file-label">
+                      DRIVER ID CARD IMAGE
+                    </label>
+                    <div className="field">
+                      <input
+                        type="file"
+                        className="input-field register-file-input"
+                        name="idCardImage"
+                        accept="image/*"
+                        onChange={handleChange}
+                        title="Upload front side of driver ID card"
+                      />
+                    </div>
+                    {errors.idCardImage && (
+                      <span className="register-error-text">
+                        {errors.idCardImage}
+                      </span>
+                    )}
+                  </>
+                )}
+
+                {/* Passwords for both user types */}
+                <div className="field">
+                  <input
+                    type="password"
+                    className="input-field"
+                    name="password"
+                    placeholder="PASSWORD (Min 6 CHARACTERS)"
+                    value={form.password}
+                    onChange={handleChange}
+                    style={centeredInputStyle}
+                  />
+                </div>
+                {errors.password && (
+                  <span className="register-error-text">{errors.password}</span>
+                )}
+
+                <div className="field">
+                  <input
+                    type="password"
+                    className="input-field"
+                    name="confirmPassword"
+                    placeholder="CONFIRM PASSWORD"
+                    value={form.confirmPassword}
+                    onChange={handleChange}
+                    style={centeredInputStyle}
+                  />
+                </div>
+                {errors.confirmPassword && (
+                  <span className="register-error-text">
+                    {errors.confirmPassword}
+                  </span>
+                )}
+
+                <p
+                  style={{
+                    textAlign: 'center',
+                    marginTop: '8px',
+                    marginBottom: '4px',
+                    color: '#ffffff',
+                    fontSize: '0.95rem',
+                    letterSpacing: '0.04em',
+                  }}
+                >
+                  MEDICAL DATA
+                </p>
+
+                {/* Blood group dropdown for both user types */}
+                <div className="field field-select">
+                  <CustomDropdown
+                    name="bloodGroup"
+                    value={form.bloodGroup}
+                    onChange={handleChange}
+                    options={bloodGroupOptions}
+                  />
+                </div>
+                {errors.bloodGroup && (
+                  <span className="register-error-text">
+                    {errors.bloodGroup}
+                  </span>
+                )}
+
+                <div className="field">
+                  <input
+                    type="text"
+                    className="input-field"
+                    name="allergies"
+                    placeholder="ALLERGIES (If ANY)"
+                    autoComplete="off"
+                    value={form.allergies}
+                    onChange={handleChange}
+                    style={centeredInputStyle}
+                  />
+                </div>
+                {errors.allergies && (
+                  <span className="register-error-text">
+                    {errors.allergies}
+                  </span>
+                )}
+
+                {/* Captcha field */}
+                <div className="field">
+                  <input
+                    type="text"
+                    className="input-field"
+                    name="captcha"
+                    placeholder="TYPE 'IVERAS' TO VERIFY"
+                    autoComplete="off"
+                    value={form.captcha}
+                    onChange={handleChange}
+                    style={centeredInputStyle}
+                  />
+                </div>
+                {errors.captcha && (
+                  <span className="register-error-text">
+                    {errors.captcha}
+                  </span>
+                )}
+
+                <div className="btn">
+                  <button
+                    type="submit"
+                    className="button1"
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Creating account...' : 'JOIN IVERAS'}
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  className="button3 register-login-button"
+                  onClick={goToLogin}
+                >
+                  ALREADY JOINED IVERAS ? ACCESS IVERAS
+                </button>
+              </form>
+            </div>
           </div>
 
-          {/* Password */}
-          <div style={{ marginBottom: '12px' }}>
-            <label
-              htmlFor="password"
-              style={{ display: 'block', fontSize: '0.85rem', marginBottom: '4px' }}
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="Minimum 6 characters"
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: '8px',
-                border: `1px solid ${errors.password ? '#b91c1c' : '#374151'}`,
-                background: '#020617',
-                color: '#e5e7eb',
-                outline: 'none',
-                fontSize: '0.9rem',
-              }}
-            />
-            {errors.password && (
-              <span style={{ color: '#fca5a5', fontSize: '0.8rem' }}>
-                {errors.password}
-              </span>
-            )}
-          </div>
-
-          {/* Confirm Password */}
-          <div style={{ marginBottom: '16px' }}>
-            <label
-              htmlFor="confirmPassword"
-              style={{ display: 'block', fontSize: '0.85rem', marginBottom: '4px' }}
-            >
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              placeholder="Re-enter your password"
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: '8px',
-                border: `1px solid ${errors.confirmPassword ? '#b91c1c' : '#374151'}`,
-                background: '#020617',
-                color: '#e5e7eb',
-                outline: 'none',
-                fontSize: '0.9rem',
-              }}
-            />
-            {errors.confirmPassword && (
-              <span style={{ color: '#fca5a5', fontSize: '0.8rem' }}>
-                {errors.confirmPassword}
-              </span>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              borderRadius: '999px',
-              border: 'none',
-              background:
-                'linear-gradient(90deg, #4f46e5, #ec4899, #f97316)',
-              color: '#f9fafb',
-              fontWeight: 600,
-              fontSize: '0.95rem',
-              cursor: submitting ? 'not-allowed' : 'pointer',
-              opacity: submitting ? 0.6 : 1,
-              marginBottom: '10px',
-            }}
+          {/* Footer curved marquee animation */}
+          <div
+            className="register-footer-marquee"
+            style={{ marginTop: '32px' }}
           >
-            {submitting ? 'Creating account...' : 'Create account'}
-          </button>
-        </form>
-
-        <div
-          style={{
-            marginTop: '4px',
-            textAlign: 'center',
-            fontSize: '0.85rem',
-            color: '#9ca3af',
-          }}
-        >
-          Already have an account?{' '}
-          <button
-            type="button"
-            onClick={goToLogin}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#60a5fa',
-              cursor: 'pointer',
-              padding: 0,
-              fontSize: '0.85rem',
-              textDecoration: 'underline',
-            }}
-          >
-            Log in
-          </button>
+            <CurvedLoop
+              marqueeText="TEAM ✦ PADMA ✦ VYUHA ✦ "
+              speed={1}
+              curveAmount={120}
+              direction="right"
+              interactive
+              className="custom-text-style"
+            />
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default RegisterPage;

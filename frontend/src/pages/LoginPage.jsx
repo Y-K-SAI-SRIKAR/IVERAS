@@ -35,7 +35,7 @@ const LoginPage = () => {
       {/* FULLSCREEN SILK BACKGROUND */}
       <div className="login-silk-bg">
         <Silk
-          speed={5}
+          speed={9}
           scale={1}
           color="#6825cc"
           noiseIntensity={1.5}
