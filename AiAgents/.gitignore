@@ -1,5 +1,5 @@
-.env
-**/.env
+./IVAI.env
+**/./IVAI.env
 
 
 .venv
