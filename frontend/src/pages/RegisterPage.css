@@ -1,0 +1,132 @@
+/* Full-page background */
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #020617;          /* near-black */
+  color: #e5e7eb;
+  padding: 24px;
+}
+
+/* Card container */
+.register-card {
+  width: 100%;
+  max-width: 420px;
+  background: #020617;
+  border-radius: 16px;
+  border: 1px solid #1f2937;
+  padding: 24px 28px 28px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+}
+
+/* Title + subtitle */
+.register-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.register-subtitle {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* API error */
+.register-api-error {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #451a1a;
+  color: #fecaca;
+  font-size: 0.85rem;
+}
+
+/* Form elements */
+.register-field {
+  margin-bottom: 12px;
+}
+
+.register-label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.register-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #020617;
+  color: #e5e7eb;
+  outline: none;
+  font-size: 0.9rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.register-input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.5);
+}
+
+/* Error state for inputs */
+.register-input-error {
+  border-color: #b91c1c;
+}
+
+.register-error-text {
+  color: #fca5a5;
+  font-size: 0.8rem;
+}
+
+/* Submit button */
+.register-submit {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(90deg, #4f46e5, #ec4899, #f97316);
+  color: #f9fafb;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.15s ease;
+}
+
+.register-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+}
+
+.register-submit:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.register-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Bottom text + link */
+.register-bottom-text {
+  margin-top: 4px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.register-bottom-link {
+  background: none;
+  border: none;
+  color: #60a5fa;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+  text-decoration: underline;
+}
