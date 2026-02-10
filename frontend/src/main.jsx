@@ -2,24 +2,34 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
+import 'leaflet/dist/leaflet.css';
+
+
 import App from './App.jsx';
 import LoginPage from './pages/LoginPage.jsx';
-import LoginDashboard from './pages/UserDashboard.jsx'
+import LoginDashboard from './pages/UserDashboard.jsx';
+import AdminDashboard from './pages/AdminDashboard.jsx'; // ✅ ADD THIS
 import ExplorePage from './pages/ExplorePage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
-
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
+        {/* LANDING PAGE */}
         <Route path="/" element={<App />} />
+
+        {/* AUTH */}
         <Route path="/LoginPage" element={<LoginPage />} />
-        <Route path="/dashboard" element={<LoginDashboard />} />
-        <Route path="/ExplorePage" element={<ExplorePage />} />
         <Route path="/register" element={<RegisterPage />} />
+
+        {/* DASHBOARDS */}
+        <Route path="/dashboard" element={<LoginDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} /> {/* ✅ ADMIN */}
+
+        {/* EXPLORE */}
+        <Route path="/ExplorePage" element={<ExplorePage />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>
 );
-

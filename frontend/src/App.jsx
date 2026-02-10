@@ -27,6 +27,8 @@ import LoginButton from './components/LoginButton';
 import RegisterButton from './components/RegisterButton';
 import LoginPage from './pages/LoginPage.jsx';
 import ExplorePage from './pages/ExplorePage.jsx';
+import AdminDashboard from './pages/AdminDashboard';
+
 
 const techLogos = [
   { node: <SiReact />, title: 'React', href: 'https://react.dev' },
