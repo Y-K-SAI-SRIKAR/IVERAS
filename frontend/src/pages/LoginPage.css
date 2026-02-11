@@ -1,0 +1,158 @@
+/* ===== FORM CARD ===== */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2em 2.2em 1.2em;
+  background-color: #171717;
+  border-radius: 25px;
+  transition: 0.4s ease-in-out;
+}
+
+.form:hover {
+  transform: scale(1.05);
+  border: 1px solid black;
+}
+
+#heading {
+  text-align: center;
+  margin: 1.4em 0 1.6em;
+  color: rgb(255, 255, 255);
+  font-size: 1.2em;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  border-radius: 25px;
+  padding: 0.7em;
+  border: none;
+  outline: none;
+  color: rgb(255, 255, 255);
+  background-color: #171717;
+  box-shadow: inset 2px 5px 10px rgb(5, 5, 5);
+}
+
+.input-icon {
+  height: 1.3em;
+  width: 1.3em;
+  fill: white;
+}
+
+.input-field {
+  background: none;
+  border: none;
+  outline: none;
+  width: 100%;
+  color: #d3d3d3;
+}
+
+.form .btn {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  margin-top: 2.1em;
+}
+
+.button1 {
+  padding: 0.55em 2.2em;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  transition: 0.4s ease-in-out;
+  background-color: #252525;
+  color: white;
+}
+
+.button1:hover {
+  background-color: black;
+  color: white;
+}
+
+.button3 {
+  margin-top: 1.1em;
+  margin-bottom: 0.8em;   /* very little space above CurvedLoop */
+  padding: 0.55em;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  transition: 0.4s ease-in-out;
+  background-color: #252525;
+  color: white;
+}
+
+.button3:hover {
+  background-color: red;
+  color: white;
+}
+
+/* ===== SILK BACKGROUND LAYOUT ===== */
+
+.login-page-root {
+  position: relative;
+  min-height: 100vh;
+}
+
+.login-silk-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.login-page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 0;
+}
+
+/* BlurText + card + curved loop wrapper */
+.login-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* BlurText styling */
+.login-blurtext-wrapper {
+  text-align: center;
+}
+
+.login-blurtext {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #f5f1ff;
+}
+
+/* Card block: card + curved text are treated as one unit */
+.login-card-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 50px;                 /* tiny gap between card and curved loop */
+}
+
+/* Card size */
+.form-wrapper {
+  width: 420px;
+}
+
+/* CurvedLoop wrapper: full-width footer, centered content */
+.login-curvedloop-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 24px;     /* distance from bottom of viewport */
+}
+
+/* Optional extra styling for curved loop text */
+.login-curvedloop-text {
+  color: #f1fbff;
+}
