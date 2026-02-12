@@ -1,8 +1,7 @@
-// CustomDropdown.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import './CustomDropdown.css';
 
-const CustomDropdown = ({ value, onChange, options, name }) => {
+const CustomDropdown = ({ value, onChange, options, name, placeholder }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -28,7 +27,11 @@ const CustomDropdown = ({ value, onChange, options, name }) => {
         className="custom-dropdown-selected"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span>{value}</span>
+        {/* ✅ Logic: If value is empty, show placeholder, else show value */}
+        <span style={{ color: value ? '#e5e5e5' : '#888' }}>
+          {value || placeholder || "Select Option"}
+        </span>
+        
         <svg
           className={`custom-dropdown-arrow ${isOpen ? 'open' : ''}`}
           width="12"

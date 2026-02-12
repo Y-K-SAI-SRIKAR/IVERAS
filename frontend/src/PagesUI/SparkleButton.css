@@ -1,0 +1,155 @@
+/* =========================
+   MAIN BUTTON (SLIGHTLY LARGER + SLEEK)
+========================= */
+
+.sparkle-button {
+  --active: 0;
+  --transition: 0.25s;
+  --spark: 5s;
+  --cut: 0.12em;
+
+  --bg:
+    radial-gradient(40% 50% at center 100%,
+      hsl(270 calc(var(--active) * 97%) 72% / var(--active)),
+      transparent),
+    radial-gradient(80% 100% at center 120%,
+      hsl(260 calc(var(--active) * 97%) 70% / var(--active)),
+      transparent),
+    hsl(260 calc(var(--active) * 97%) calc((var(--active) * 44%) + 12%));
+
+  background: var(--bg);
+
+  /* 🔥 slightly bigger */
+  font-size: 1.35rem;
+  font-weight: 600;
+  height: 44px;
+  padding: 0 1.6em;
+
+  border: 0;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  gap: 0.02rem;
+
+  border-radius: 50px;
+  position: relative;
+  white-space: nowrap;
+
+  box-shadow:
+    0 0 calc(var(--active) * 2.5em) calc(var(--active) * 0.9em) hsl(260 97% 61% / 0.65),
+    0 -0.05em 0 0 hsl(260 calc(var(--active) * 97%) calc(var(--active) * 60%)) inset;
+
+  transform: scale(calc(1 + (var(--active) * 0.06)));
+
+  transition: all var(--transition);
+}
+
+.sparkle-button:active {
+  transform: scale(0.97);
+}
+
+
+/* =========================
+   ICON
+========================= */
+
+.sparkle-button svg {
+  inline-size: 1.1em;
+  transform: translateY(-1px);
+}
+
+.sparkle path {
+  fill: white;
+  stroke: white;
+}
+
+
+/* =========================
+   GLOW BORDER
+========================= */
+
+.sparkle-button::before {
+  content: "";
+  position: absolute;
+  inset: -0.15em;
+  z-index: -1;
+
+  border-radius: 50px;
+  border: 2px solid hsl(260 97% 60% / 0.35);
+
+  opacity: var(--active);
+  transition: opacity var(--transition);
+}
+
+
+/* =========================
+   SPARK ROTATION
+========================= */
+
+.spark {
+  position: absolute;
+  inset: 0;
+  border-radius: 50px;
+  overflow: hidden;
+
+  mask: linear-gradient(white, transparent 50%);
+  -webkit-mask: linear-gradient(white, transparent 50%);
+
+  animation: flip calc(var(--spark) * 2) infinite steps(2, end);
+}
+
+@keyframes flip {
+  to { transform: rotate(360deg); }
+}
+
+
+/* =========================
+   PARTICLES
+========================= */
+
+.particle-pen {
+  position: absolute;
+  width: 180%;
+  aspect-ratio: 1;
+
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  mask: radial-gradient(white, transparent 65%);
+  -webkit-mask: radial-gradient(white, transparent 65%);
+
+  z-index: -1;
+  opacity: var(--active);
+  transition: opacity var(--transition);
+}
+
+.particle {
+  fill: white;
+  width: 0.25rem;
+}
+
+
+/* =========================
+   TEXT
+========================= */
+
+.text {
+  letter-spacing: 0.02em;
+
+  background: linear-gradient(90deg, #ffffff, #eaeaea);
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  color: transparent;
+}
+
+
+/* =========================
+   HOVER
+========================= */
+
+.sparkle-button:is(:hover, :focus-visible) {
+  --active: 1;
+}

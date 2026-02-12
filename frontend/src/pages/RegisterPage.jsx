@@ -35,7 +35,7 @@ const RegisterPage = () => {
     driverId: '',
     ambulanceImage: null,
     idCardImage: null,
-    bloodGroup: '',
+    bloodGroup: '', // Initially empty to trigger the placeholder
     allergies: '',
     captcha: '',
   });
@@ -97,7 +97,6 @@ const RegisterPage = () => {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
-    // IoT device is required only for Public
     if (form.userType === 'Public' && !form.iotDeviceId.trim()) {
       newErrors.iotDeviceId = 'IoT device ID is required';
     }
@@ -456,13 +455,14 @@ const RegisterPage = () => {
                   MEDICAL DATA
                 </p>
 
-                {/* Blood group dropdown for both user types */}
+                {/* Blood group dropdown with Placeholder */}
                 <div className="field field-select">
                   <CustomDropdown
                     name="bloodGroup"
                     value={form.bloodGroup}
                     onChange={handleChange}
                     options={bloodGroupOptions}
+                    placeholder="CHOOSE YOUR BLOOD GROUP" // ✅ Prompt added here
                   />
                 </div>
                 {errors.bloodGroup && (

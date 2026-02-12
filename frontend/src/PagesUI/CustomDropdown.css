@@ -7,7 +7,8 @@
 .custom-dropdown-selected {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* Changed from space-between to center */
+  justify-content: center; 
   padding: 0.4em 1em 0.4em 0.75em;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.04);
@@ -18,6 +19,8 @@
   transition: all 0.2s ease;
   user-select: none;
   min-height: auto;
+  /* Added to allow the arrow to be positioned relative to this box */
+  position: relative; 
 }
 
 .custom-dropdown-selected:hover {
@@ -27,6 +30,9 @@
 
 .custom-dropdown-selected span {
   font-size: 0.85rem;
+  /* Ensures the span takes full width to respect centering */
+  text-align: center;
+  width: 100%;
 }
 
 .custom-dropdown-arrow {
@@ -34,6 +40,9 @@
   flex-shrink: 0;
   width: 10px;
   height: 10px;
+  /* ✅ ADDED: Forces the arrow to stay on the right while text centers */
+  position: absolute;
+  right: 1.2em;
 }
 
 .custom-dropdown-arrow.open {
@@ -71,6 +80,8 @@
   transition: background-color 0.15s ease;
   user-select: none;
   font-size: 0.85rem;
+  /* ✅ ADDED: Centers text in the dropdown list as well */
+  text-align: center; 
 }
 
 .custom-dropdown-option:hover {

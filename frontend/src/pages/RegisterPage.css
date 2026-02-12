@@ -70,6 +70,13 @@
   background-repeat: no-repeat;
 }
 
+/* ✅ PLACEHOLDER VISIBILITY: Styles the "CHOOSE YOUR BLOOD GROUP" text 
+   when it is the selected but disabled option */
+.register-select:invalid,
+.register-select option[value=""] {
+  color: #888888; /* Slightly dimmer to look like a placeholder */
+}
+
 /* Focus outline */
 .register-select:focus {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
@@ -215,7 +222,7 @@
 .register-silk-bg {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  zIndex: 0;
 }
 
 .register-page {
@@ -266,7 +273,7 @@
 .register-form-wrapper {
   width: 750px;
   max-width: 100vw;
-  }
+}
 
 /* Validation error text */
 .register-error-text {
@@ -281,6 +288,7 @@
 .register-login-button {
   font-size: 0.85rem;
 }
+
 .register-file-label {
   display: block;
   text-align: center;

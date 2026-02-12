@@ -4,11 +4,10 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import 'leaflet/dist/leaflet.css';
 
-
 import App from './App.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import LoginDashboard from './pages/UserDashboard.jsx';
-import AdminDashboard from './pages/AdminDashboard.jsx'; // ✅ ADD THIS
+import AdminDashboard from './pages/AdminDashboard.jsx';
 import ExplorePage from './pages/ExplorePage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 
@@ -25,7 +24,7 @@ createRoot(document.getElementById('root')).render(
 
         {/* DASHBOARDS */}
         <Route path="/dashboard" element={<LoginDashboard />} />
-        <Route path="/admin" element={<AdminDashboard />} /> {/* ✅ ADMIN */}
+        <Route path="/admin" element={<AdminDashboard />} />
 
         {/* EXPLORE */}
         <Route path="/ExplorePage" element={<ExplorePage />} />
