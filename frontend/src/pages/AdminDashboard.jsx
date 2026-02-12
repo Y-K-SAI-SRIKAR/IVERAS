@@ -1,3 +1,5 @@
+// AdminDashboard.jsx
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,6 +13,10 @@ import {
 
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+
+import Silk from '../PagesUI/Silk.jsx';
+import LogoutButton from '../PagesUI/LogoutButton.jsx';
+import BlurText from '../PagesUI/BlurText.jsx';
 
 /* ================= ICONS ================= */
 
@@ -65,14 +71,11 @@ const AdminDashboard = () => {
       name: 'LifeCare Ambulance',
       driver: 'Ramesh',
       regNo: 'TS09AB1234',
-
       verified: false,
       status: 'Idle',
-
       base: BASES[0],
       accident: ACCIDENTS[0],
       hospital: HOSPITALS[0],
-
       position: BASES[0],
       route: [],
       routeIndex: 0,
@@ -84,14 +87,11 @@ const AdminDashboard = () => {
       name: 'Apollo Emergency',
       driver: 'Suresh',
       regNo: 'TS10XY4567',
-
       verified: false,
       status: 'Idle',
-
       base: BASES[1],
       accident: ACCIDENTS[1],
       hospital: HOSPITALS[1],
-
       position: BASES[1],
       route: [],
       routeIndex: 0,
@@ -103,14 +103,11 @@ const AdminDashboard = () => {
       name: 'MedPlus Rescue',
       driver: 'Kiran',
       regNo: 'TS08PQ8899',
-
       verified: false,
       status: 'Idle',
-
       base: BASES[2],
       accident: ACCIDENTS[2],
       hospital: HOSPITALS[2],
-
       position: BASES[2],
       route: [],
       routeIndex: 0,
@@ -119,10 +116,10 @@ const AdminDashboard = () => {
     },
   ]);
 
-  /* ================= MOVEMENT ENGINE ================= */
+  /* ================= MOVEMENT ================= */
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const timer = setInterval(() => {
       setAmbulances((prev) =>
         prev.map((amb) => {
           if (!amb.active) return amb;
@@ -136,46 +133,38 @@ const AdminDashboard = () => {
             };
           }
 
-          const next = amb.route[amb.routeIndex];
-
-          let status = amb.status;
-
-          if (amb.routeIndex === 0) status = 'On Duty';
-          if (amb.routeIndex === 1) status = 'On Duty';
-
           return {
             ...amb,
-            position: next,
+            position: amb.route[amb.routeIndex],
             routeIndex: amb.routeIndex + 1,
-            status,
+            status: 'On Duty',
           };
         })
       );
-    }, 3000);
+    }, 2500);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(timer);
   }, []);
 
-  /* ================= AUTO RESET TO IDLE ================= */
+  /* ================= AUTO RESET ================= */
 
   useEffect(() => {
     ambulances.forEach((amb) => {
       if (amb.finished) {
         setTimeout(() => {
           setAmbulances((prev) =>
-            prev.map((a) => {
-              if (a.id === amb.id && a.finished) {
-                return {
-                  ...a,
-                  status: 'Idle',
-                  finished: false,
-                  position: a.base,
-                  route: [],
-                  routeIndex: 0,
-                };
-              }
-              return a;
-            })
+            prev.map((a) =>
+              a.id === amb.id && a.finished
+                ? {
+                    ...a,
+                    status: 'Idle',
+                    finished: false,
+                    position: a.base,
+                    route: [],
+                    routeIndex: 0,
+                  }
+                : a
+            )
           );
         }, 4000);
       }
@@ -186,25 +175,18 @@ const AdminDashboard = () => {
 
   const verifyAmbulance = (id) => {
     setAmbulances((prev) =>
-      prev.map((amb) => {
-        if (amb.id === id && !amb.verified) {
-          return {
-            ...amb,
-            verified: true,
-            status: 'Emergency',
-
-            route: [
-              amb.base,
-              amb.accident,
-              amb.hospital,
-            ],
-
-            routeIndex: 0,
-            active: true,
-          };
-        }
-        return amb;
-      })
+      prev.map((amb) =>
+        amb.id === id && !amb.verified
+          ? {
+              ...amb,
+              verified: true,
+              status: 'Emergency',
+              route: [amb.base, amb.accident, amb.hospital],
+              routeIndex: 0,
+              active: true,
+            }
+          : amb
+      )
     );
 
     setSelected(null);
@@ -227,124 +209,137 @@ const AdminDashboard = () => {
   return (
     <div style={container}>
 
-      <h1 style={title}>Admin Control Center</h1>
+      {/* BACKGROUND */}
+      <div style={bgWrap}>
+        <Silk speed={5} scale={1} color="#7B7481" noiseIntensity={1.5} />
+      </div>
 
-      <div style={grid}>
+      {/* LOGOUT */}
+      <div style={logoutPos}>
+        <LogoutButton onClick={() => navigate('/')} />
+      </div>
 
-        {/* LEFT PANEL */}
-        <div style={panel}>
-
-          <h3 style={sectionTitle}>Ambulance Management</h3>
-
-          {ambulances.map((amb) => (
-            <div key={amb.id} style={card}>
-
-              <h4>{amb.name}</h4>
-              <p>🚑 {amb.regNo}</p>
-              <p>👨‍✈️ {amb.driver}</p>
-
-              <p>
-                Status:{' '}
-                <span style={statusColor(amb.status)}>
-                  {amb.status}
-                </span>
-              </p>
-
-              <p>
-                Verified:{' '}
-                {amb.verified ? 'Yes' : 'No'}
-              </p>
-
-              {!amb.verified && (
-                <button
-                  style={openBtn}
-                  onClick={() => setSelected(amb)}
-                >
-                  Verify Ambulance
-                </button>
-              )}
-
-            </div>
-          ))}
-        </div>
-
-        {/* RIGHT PANEL */}
-        <div style={panel}>
-
-          <h3 style={sectionTitle}>Live GPS Tracking</h3>
-
-          <MapContainer
-            center={[17.385, 78.48]}
-            zoom={13}
-            style={mapStyle}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-
-            {/* ACCIDENT */}
-            {ambulances.map((amb) => (
-              <Marker
-                key={'a' + amb.id}
-                position={[
-                  amb.accident.lat,
-                  amb.accident.lng,
-                ]}
-                icon={accidentIcon}
-              />
-            ))}
-
-            {/* HOSPITAL */}
-            {ambulances.map((amb) => (
-              <Marker
-                key={'h' + amb.id}
-                position={[
-                  amb.hospital.lat,
-                  amb.hospital.lng,
-                ]}
-                icon={hospitalIcon}
-              />
-            ))}
-
-            {/* AMBULANCE */}
-            {ambulances.map((amb) => (
-              <Marker
-                key={'m' + amb.id}
-                position={[
-                  amb.position.lat,
-                  amb.position.lng,
-                ]}
-                icon={ambulanceIcon}
-              >
-                <Popup>
-                  🚑 {amb.name}
-                  <br />
-                  {amb.status}
-                </Popup>
-              </Marker>
-            ))}
-
-            {/* ROUTES */}
-            {ambulances.map(
-              (amb) =>
-                amb.route.length > 0 && (
-                  <Polyline
-                    key={'r' + amb.id}
-                    positions={amb.route.map((p) => [
-                      p.lat,
-                      p.lng,
-                    ])}
-                    color="violet"
-                  />
-                )
-            )}
-
-          </MapContainer>
-
+      {/* HEADER */}
+      <div style={header}>
+        <div style={headerText}>
+          <BlurText
+            text="ADMIN CONTROL CENTER"
+            delay={200}
+            animateBy="letters"
+            direction="top"
+          />
         </div>
       </div>
 
-      {/* VERIFY MODAL */}
+      {/* CONTENT */}
+      <div style={contentWrap}>
+
+        <div style={grid}>
+
+          {/* LEFT PANEL */}
+          <div style={panelLeft}>
+
+            <h3 style={sectionTitle}>Ambulance Management</h3>
+
+            <div style={listScroll}>
+
+              {ambulances.map((amb) => (
+                <div key={amb.id} style={card}>
+
+                  <h4>{amb.name}</h4>
+                  <p>🚑 {amb.regNo}</p>
+                  <p>👨‍✈️ {amb.driver}</p>
+
+                  <p>
+                    Status:{' '}
+                    <span style={statusColor(amb.status)}>
+                      {amb.status}
+                    </span>
+                  </p>
+
+                  <p>Verified: {amb.verified ? 'Yes' : 'No'}</p>
+
+                  {!amb.verified && (
+                    <button
+                      style={verifyBtnBase}
+                      onClick={() => setSelected(amb)}
+                      onMouseEnter={(e) => {
+                        e.target.style.background =
+                          'linear-gradient(90deg,#5a189a,#9d4edd)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = '#000';
+                      }}
+                    >
+                      Verify Ambulance
+                    </button>
+                  )}
+
+                </div>
+              ))}
+
+            </div>
+          </div>
+
+          {/* RIGHT PANEL */}
+          <div style={panel}>
+
+            <h3 style={sectionTitle}>Live GPS Tracking</h3>
+
+            <MapContainer
+              center={[17.385, 78.48]}
+              zoom={13}
+              style={mapStyle}
+            >
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+              {ambulances.map((amb) => (
+                <Marker
+                  key={'a' + amb.id}
+                  position={[amb.accident.lat, amb.accident.lng]}
+                  icon={accidentIcon}
+                />
+              ))}
+
+              {ambulances.map((amb) => (
+                <Marker
+                  key={'h' + amb.id}
+                  position={[amb.hospital.lat, amb.hospital.lng]}
+                  icon={hospitalIcon}
+                />
+              ))}
+
+              {ambulances.map((amb) => (
+                <Marker
+                  key={'m' + amb.id}
+                  position={[amb.position.lat, amb.position.lng]}
+                  icon={ambulanceIcon}
+                >
+                  <Popup>
+                    🚑 {amb.name}<br />
+                    {amb.status}
+                  </Popup>
+                </Marker>
+              ))}
+
+              {ambulances.map(
+                (amb) =>
+                  amb.route.length > 0 && (
+                    <Polyline
+                      key={'r' + amb.id}
+                      positions={amb.route.map((p) => [p.lat, p.lng])}
+                      color="violet"
+                    />
+                  )
+              )}
+
+            </MapContainer>
+
+          </div>
+        </div>
+      </div>
+
+      {/* MODAL */}
       {selected && (
         <div style={modalBg}>
 
@@ -359,19 +354,15 @@ const AdminDashboard = () => {
             <div style={btnRow}>
 
               <button
-                style={verifyBtn}
-                onClick={() =>
-                  verifyAmbulance(selected.id)
-                }
+                style={acceptBtn}
+                onClick={() => verifyAmbulance(selected.id)}
               >
                 Accept
               </button>
 
               <button
                 style={rejectBtn}
-                onClick={() =>
-                  rejectAmbulance(selected.id)
-                }
+                onClick={() => rejectAmbulance(selected.id)}
               >
                 Reject
               </button>
@@ -383,13 +374,6 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      <button
-        style={logoutBtn}
-        onClick={() => navigate('/')}
-      >
-        Logout
-      </button>
-
     </div>
   );
 };
@@ -398,110 +382,133 @@ const AdminDashboard = () => {
 
 const container = {
   minHeight: '100vh',
-  background: 'linear-gradient(135deg,#2b0057,#12002b,#000)',
   color: '#fff',
-  padding: '30px',
   fontFamily: 'Poppins',
+  position: 'relative',
 };
 
-const title = {
+const bgWrap = {
+  position: 'fixed',
+  inset: 0,
+  zIndex: 0,
+};
+
+const logoutPos = {
+  position: 'fixed',
+  top: 20,
+  right: 20,
+  zIndex: 50,
+};
+
+const header = {
+  marginTop: 90,
   textAlign: 'center',
-  fontSize: '3rem',
-  marginBottom: '15px',
-  background: 'linear-gradient(90deg,#c77dff,#9d4edd)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
+  display: 'flex',
+  justifyContent: 'center',
+};
+
+const headerText = {
+  fontSize: '3.5rem',
+  fontWeight: 900,
+  letterSpacing: '3px',
+};
+
+const contentWrap = {
+  position: 'relative',
+  zIndex: 2,
 };
 
 const grid = {
   display: 'grid',
   gridTemplateColumns: '1fr 1.4fr',
-  gap: '25px',
+  gap: 25,
+  padding: 30,
 };
 
 const panel = {
-  background: 'rgba(0,0,0,0.65)',
-  borderRadius: '20px',
-  padding: '22px',
+  background: 'rgba(0,0,0,0.7)',
+  borderRadius: 20,
+  padding: 22,
+  backdropFilter: 'blur(12px)',
+};
+
+const panelLeft = {
+  ...panel,
+  height: '600px',
+  display: 'flex',
+  flexDirection: 'column',
+};
+
+const listScroll = {
+  overflowY: 'auto',
+  flex: 1,
 };
 
 const sectionTitle = {
-  color: '#e0aaff',
-  marginBottom: '12px',
+  color: '#d4b3ff',
+  marginBottom: 12,
 };
 
 const card = {
   background: 'linear-gradient(180deg,#0b0b14,#050508)',
-  padding: '14px',
-  borderRadius: '16px',
-  marginBottom: '12px',
+  padding: 14,
+  borderRadius: 16,
+  marginBottom: 12,
 };
 
-const openBtn = {
+const verifyBtnBase = {
   width: '100%',
-  marginTop: '8px',
-  padding: '8px',
-  borderRadius: '18px',
-  border: 'none',
-  background: 'linear-gradient(90deg,#5a189a,#9d4edd)',
+  marginTop: 8,
+  padding: 8,
+  borderRadius: 18,
+  border: '1px solid #9d4edd',
+  background: '#000',
   color: '#fff',
   cursor: 'pointer',
+  transition: '0.3s',
 };
 
 const mapStyle = {
-  height: '420px',
-  borderRadius: '18px',
+  height: 520,
+  borderRadius: 18,
 };
 
 const modalBg = {
   position: 'fixed',
   inset: 0,
-  background: 'rgba(10,0,30,0.85)',
+  background: '#000', // ✅ PURE BLACK
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  zIndex: 10000, // ✅ ABOVE MAP
+  zIndex: 9999,
 };
 
 const modal = {
-  background: 'linear-gradient(180deg,#12002b,#050508)',
-  padding: '28px',
-  borderRadius: '22px',
-  width: '420px',
+  background: '#050508',
+  padding: 28,
+  borderRadius: 22,
+  width: 420,
 };
 
 const btnRow = {
   display: 'flex',
   justifyContent: 'space-between',
-  marginTop: '22px',
+  marginTop: 22,
 };
 
-const verifyBtn = {
-  background: 'linear-gradient(90deg,#00ff9d,#00c896)',
+const acceptBtn = {
+  background: '#00ff9d',
   border: 'none',
   padding: '10px 28px',
-  borderRadius: '22px',
+  borderRadius: 22,
   cursor: 'pointer',
 };
 
 const rejectBtn = {
-  background: 'linear-gradient(90deg,#ff4d6d,#ff758f)',
+  background: '#ff4d6d',
   border: 'none',
   padding: '10px 28px',
-  borderRadius: '22px',
-  cursor: 'pointer',
-};
-
-const logoutBtn = {
-  marginTop: '25px',
-  display: 'block',
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  padding: '14px 45px',
-  borderRadius: '30px',
-  border: 'none',
-  background: 'linear-gradient(90deg,#5a189a,#9d4edd)',
-  color: '#fff',
+  borderRadius: 22,
   cursor: 'pointer',
 };
 
