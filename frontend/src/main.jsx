@@ -11,6 +11,7 @@ import AdminDashboard from './pages/AdminDashboard.jsx';
 import ExplorePage from './pages/ExplorePage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import HelperDashboard from './pages/HelperDashboard.jsx';
+import AmbulanceStream from './pages/AmbulanceStream.jsx'; // <--- IMPORT THIS
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -27,6 +28,9 @@ createRoot(document.getElementById('root')).render(
         <Route path="/dashboard" element={<LoginDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/helper" element={<HelperDashboard />} />
+
+        {/* LIVE STREAMING */}
+        <Route path="/live-stream" element={<AmbulanceStream />} /> {/* <--- NEW ROUTE */}
 
         {/* EXPLORE */}
         <Route path="/ExplorePage" element={<ExplorePage />} />

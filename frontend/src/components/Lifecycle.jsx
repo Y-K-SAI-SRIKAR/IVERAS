@@ -12,7 +12,7 @@ const steps = [
   { 
     id: 2,
     title: "CLOUD SIGNAL", 
-    desc: "GPS coordinates & severity data uploaded to Firebase via SIM800L GPRS in < 2 seconds.", 
+    desc: "GPS coordinates & severity data uploaded to MongoDB via SIM800L GPRS in < 2 seconds.", 
     icon: "📡", 
     side: "right" 
   },
