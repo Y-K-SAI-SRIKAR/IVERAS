@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Fingerprint, ShieldAlert, Zap, MapPin, Phone, 
   Wrench, Siren, PlusCircle, MessageSquare, 
-  X, Activity, AlertTriangle, HeartPulse, Clock, CloudRain, Car, UserCheck, Camera, UploadCloud
+  X, Activity, AlertTriangle, HeartPulse, Clock, CloudRain, Car, UserCheck, Camera, UploadCloud, Send
 } from "lucide-react"; 
 
 import BlurText from "../PagesUI/BlurText.jsx";
@@ -34,6 +34,32 @@ const GlassModal = ({ isOpen, onClose, title, children, color = "white" }) => {
   );
 };
 
+/* ================== CHAT SLIDEBAR ================== */
+const ChatSlidebar = ({ isOpen, onClose, messages }) => {
+    return (
+        <div className={`chat-slidebar ${isOpen ? 'open' : ''}`}>
+            <div className="slidebar-header">
+                <h3><MessageSquare size={18}/> MESSAGES</h3>
+                <button onClick={onClose}><X size={20}/></button>
+            </div>
+            <div className="slidebar-body">
+                {messages.length === 0 ? (
+                    <p className="no-msg">No new messages.</p>
+                ) : (
+                    messages.map((msg, idx) => (
+                        <div key={idx} className={`msg-bubble ${msg.sender === 'You' ? 'sent' : 'received'}`}>
+                            <span className="msg-sender">{msg.sender}</span>
+                            <p>{msg.text}</p>
+                            <span className="msg-time">{msg.time}</span>
+                        </div>
+                    ))
+                )}
+            </div>
+        </div>
+    );
+};
+
+
 /* ================== MAIN DASHBOARD ================== */
 const UserDashboard = () => {
   const [location, setLocation] = useState(null);
@@ -42,6 +68,13 @@ const UserDashboard = () => {
   const [vehicleStatus, setVehicleStatus] = useState("SAFE");
   const [time, setTime] = useState(getCurrentTime());
   const [reportImage, setReportImage] = useState(null); 
+  
+  // --- CHAT STATES ---
+  const [isChatSlidebarOpen, setIsChatSlidebarOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]); // Array of {sender, text, time}
+  const [newMessage, setNewMessage] = useState("");
+  const [showChatInput, setShowChatInput] = useState(false); // To toggle input in Fuel Modal
+
   const navigate = useNavigate();
 
   // Mock User Data
@@ -120,6 +153,22 @@ const UserDashboard = () => {
     setVehicleStatus(prev => prev === "SAFE" ? "ACCIDENT" : "SAFE");
   };
 
+  // --- CHAT LOGIC ---
+  const handleSendMessage = () => {
+      if(!newMessage.trim()) return;
+      
+      const msg = { sender: 'You', text: newMessage, time: getCurrentTime() };
+      setChatMessages(prev => [...prev, msg]);
+      setNewMessage("");
+      setShowChatInput(false); // Hide input after sending or keep open if preferred
+      alert("Message Broadcasted to Nearby Users!");
+
+      // Simulate a reply for demo purposes
+      setTimeout(() => {
+          setChatMessages(prev => [...prev, { sender: 'John Doe', text: 'I am 2 mins away with petrol. Stay put.', time: getCurrentTime() }]);
+      }, 3000);
+  };
+
   return (
     <div className="dashboard-container">
       
@@ -140,6 +189,11 @@ const UserDashboard = () => {
             <div className="system-time">
               <Clock size={14} style={{marginRight:5}}/> {getCurrentDate()} • {time}
             </div>
+            {/* CHAT NOTIFICATION ICON */}
+            <div className="chat-notify-icon" onClick={() => setIsChatSlidebarOpen(true)}>
+                <MessageSquare size={18} />
+                {chatMessages.length > 0 && <span className="badge">{chatMessages.length}</span>}
+            </div>
           </div>
           <BlurText text="IVERAS COMMAND CENTER" delay={100} animateBy="letters" direction="top" className="main-title"/>
         </div>
@@ -149,21 +203,21 @@ const UserDashboard = () => {
           
           {/* 1. STATUS BAR */}
           <div className={`bento-card full-width status-bar ${vehicleStatus === "ACCIDENT" ? "status-critical" : "status-safe"} animate-slide-up`}>
-             <div className="status-content">
-               {vehicleStatus === "SAFE" ? (
-                 <>
-                   <div className="ecg-line"></div>
-                   <Activity size={20} className="pulse-icon" />
-                   <span className="status-text">SYSTEM STATUS: <strong style={{color:'#00ff9d'}}>NORMAL</strong></span>
-                   <span className="sub-status hidden-mobile"> • SENSORS ACTIVE • GPS LOCKED</span>
-                 </>
-               ) : (
-                 <>
-                   <AlertTriangle size={24} className="blink-icon" />
-                   <span className="status-text">CRITICAL ALERT: <strong>ACCIDENT DETECTED</strong></span>
-                 </>
-               )}
-             </div>
+              <div className="status-content">
+                {vehicleStatus === "SAFE" ? (
+                  <>
+                    <div className="ecg-line"></div>
+                    <Activity size={20} className="pulse-icon" />
+                    <span className="status-text">SYSTEM STATUS: <strong style={{color:'#00ff9d'}}>NORMAL</strong></span>
+                    <span className="sub-status hidden-mobile"> • SENSORS ACTIVE • GPS LOCKED</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle size={24} className="blink-icon" />
+                    <span className="status-text">CRITICAL ALERT: <strong>ACCIDENT DETECTED</strong></span>
+                  </>
+                )}
+              </div>
           </div>
 
           {/* 2. EXPANDED IDENTITY BLADE */}
@@ -266,7 +320,7 @@ const UserDashboard = () => {
               <div className="card-glow" style={{background: '#ff4500'}}></div>
             </div>
 
-            <div className="bento-card action-card fuel hover-effect" onClick={() => { setActiveModal('fuel'); setFuelStatus('idle'); }}>
+            <div className="bento-card action-card fuel hover-effect" onClick={() => { setActiveModal('fuel'); setFuelStatus('idle'); setShowChatInput(false); }}>
               <div className="icon-box"><Zap size={24} /></div>
               <div className="text-box">
                 <h3>FUEL ASSIST</h3>
@@ -314,6 +368,9 @@ const UserDashboard = () => {
         </div>
       </div>
 
+      {/* SIDEBAR */}
+      <ChatSlidebar isOpen={isChatSlidebarOpen} onClose={() => setIsChatSlidebarOpen(false)} messages={chatMessages} />
+
       {/* DEV BUTTON */}
       <button onClick={toggleCrashSimulation} className="dev-crash-btn">
         [DEV] CRASH
@@ -351,7 +408,7 @@ const UserDashboard = () => {
         </div>
       </GlassModal>
       
-      {/* FUEL MODAL */}
+      {/* FUEL MODAL (UPDATED) */}
       <GlassModal isOpen={activeModal === 'fuel'} onClose={() => setActiveModal(null)} title="FUEL ASSISTANCE" color="#ffd60a">
         {fuelStatus === 'idle' && (
           <div className="modal-center">
@@ -361,20 +418,40 @@ const UserDashboard = () => {
         )}
         {fuelStatus === 'searching' && (
           <div className="modal-center">
-             <div className="loader"></div>
-             <p>Scanning 2km radius for active drivers...</p>
+              <div className="loader"></div>
+              <p>Scanning 2km radius for active drivers...</p>
           </div>
         )}
         {fuelStatus === 'found' && (
           <div className="driver-found">
-            <div className="driver-card">
-              <div className="avatar">JD</div>
-              <div><h4>John Doe</h4><p>2 mins away • Can spare 1L</p></div>
-            </div>
-            <div className="modal-actions">
-               <button className="btn-secondary"><MessageSquare size={16}/> Chat</button>
-               <button className="btn-primary" onClick={() => alert("Contact Shared")}>View Contact</button>
-            </div>
+            {!showChatInput ? (
+                <>
+                    <div className="driver-card">
+                        <div className="avatar">JD</div>
+                        <div><h4>John Doe</h4><p>2 mins away • Can spare 1L</p></div>
+                    </div>
+                    <div className="modal-actions">
+                        {/* OPEN CHAT INPUT IN MODAL */}
+                        <button className="btn-secondary" onClick={() => setShowChatInput(true)}><MessageSquare size={16}/> Leave Message</button>
+                        <button className="btn-primary" onClick={() => alert("Contact Shared")}>View Contact</button>
+                    </div>
+                </>
+            ) : (
+                /* CHAT INPUT VIEW */
+                <div className="chat-input-view">
+                    <p style={{marginBottom: 10, fontSize: 13, color: '#ccc'}}>Broadcast a message to nearby helpers:</p>
+                    <textarea 
+                        className="chat-textarea" 
+                        placeholder="Ex: I'm in a red Creta near the junction..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                    ></textarea>
+                    <div className="modal-actions">
+                        <button className="btn-secondary" onClick={() => setShowChatInput(false)}>Cancel</button>
+                        <button className="btn-primary" onClick={handleSendMessage}><Send size={16} /> Send</button>
+                    </div>
+                </div>
+            )}
           </div>
         )}
       </GlassModal>
@@ -479,8 +556,27 @@ const UserDashboard = () => {
         }
 
         .header-wrap { margin-bottom: 30px; text-align: center; }
-        .header-top { display: flex; justify-content: center; margin-bottom: 10px; opacity: 0.8; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+        .header-top { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; opacity: 0.8; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
         .main-title { font-family: 'Inter', sans-serif; font-weight: 900; letter-spacing: -1px; }
+
+        /* CHAT SLIDEBAR */
+        .chat-notify-icon { cursor: pointer; position: relative; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 8px; transition: 0.2s; }
+        .chat-notify-icon:hover { background: rgba(255,255,255,0.2); }
+        .badge { position: absolute; top: -5px; right: -5px; background: #ff0050; color: white; font-size: 9px; width: 14px; height: 14px; border-radius: 50%; display: flex; alignItems: center; justify-content: center; font-weight: bold; }
+        
+        .chat-slidebar { position: fixed; top: 0; right: 0; bottom: 0; width: 300px; background: #121212; border-left: 1px solid #333; z-index: 2000; transform: translateX(100%); transition: transform 0.3s ease; display: flex; flex-direction: column; }
+        .chat-slidebar.open { transform: translateX(0); }
+        .slidebar-header { padding: 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        .slidebar-header h3 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 16px; }
+        .slidebar-header button { background: none; border: none; color: #777; cursor: pointer; }
+        .slidebar-body { padding: 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .no-msg { text-align: center; color: #555; margin-top: 50px; font-size: 13px; }
+        
+        .msg-bubble { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 13px; line-height: 1.4; position: relative; }
+        .msg-bubble.sent { align-self: flex-end; background: #2a2a2a; border: 1px solid #444; color: #ddd; border-bottom-right-radius: 2px; }
+        .msg-bubble.received { align-self: flex-start; background: rgba(255, 214, 10, 0.1); border: 1px solid rgba(255, 214, 10, 0.2); color: #ffd60a; border-bottom-left-radius: 2px; }
+        .msg-sender { font-size: 9px; opacity: 0.7; display: block; margin-bottom: 2px; font-weight: bold; }
+        .msg-time { font-size: 9px; opacity: 0.4; display: block; text-align: right; margin-top: 4px; }
 
         /* ================== RESPONSIVE GRID ================== */
         .bento-grid {
@@ -591,6 +687,11 @@ const UserDashboard = () => {
         
         .driver-card { background: #1a1a1a; padding: 20px; border-radius: 16px; display: flex; gap: 20px; align-items: center; text-align: left; border: 1px solid #333; }
         .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        
+        .chat-input-view { text-align: left; }
+        .chat-textarea { width: 100%; background: #222; border: 1px solid #333; border-radius: 12px; padding: 15px; color: white; height: 80px; resize: none; outline: none; font-family: 'Inter', sans-serif; font-size: 13px; }
+        .chat-textarea:focus { border-color: #ffd60a; }
+
         .mech-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 10px; }
         .mech-info h4 { margin: 0 0 5px 0; color: white; }
         .mech-tag { font-size: 10px; background: #222; padding: 4px 8px; border-radius: 6px; color: #888; text-transform: uppercase; }

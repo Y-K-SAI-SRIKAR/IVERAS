@@ -1,78 +1,63 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+// AdminDashboard.jsx
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import Map, {
+  Marker,
+  Popup,
+  Source,
+  Layer,
+  NavigationControl,
+} from "react-map-gl";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 import { 
   Siren, CheckCircle, XCircle, Activity, MapPin, 
   ShieldAlert, BrainCircuit, Clock, PlusCircle, Building2, Save, 
   Ambulance, User, Navigation, Video
 } from "lucide-react";
 
-// --- IMPORT RESTORED HERE ---
+// --- CUSTOM IMPORTS ---
 import Silk from '../PagesUI/Silk.jsx'; 
 import LogoutButton from '../PagesUI/LogoutButton.jsx';
 import BlurText from '../PagesUI/BlurText.jsx';
 
-/* ================= ICONS ================= */
-const ambulanceIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2967/2967350.png',
-  iconSize: [35, 35],
-  iconAnchor: [17, 35],
-});
+/* ================= MAPBOX TOKEN ================= */
+// FIX: Renamed variable to match the usage inside the Map component
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
-const hospitalIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/4320/4320371.png', 
-  iconSize: [35, 35],
-  iconAnchor: [17, 35],
-});
-
-const accidentIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/564/564619.png', 
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-});
-
-const missionIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/1533/1533913.png', 
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-});
-
-/* ================= UTILS & COMPONENTS ================= */
+/* ================= UTILS ================= */
 const getCurrentTime = () => new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-
-const MapController = ({ view }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (view) {
-      map.flyTo(view.center, view.zoom, { duration: 1.5 });
-    }
-  }, [view, map]);
-  return null;
-};
 
 const Modal = ({ isOpen, onClose, title, children, color = "#4cc9f0" }) => {
   if (!isOpen) return null;
   return (
-    <div className="modal-overlay">
-      <div className="modal-content" style={{ borderColor: color, boxShadow: `0 0 30px ${color}40` }}>
-        <div className="modal-header">
-          <h3 style={{ color: color, textShadow: `0 0 10px ${color}` }}>{title}</h3>
-          <button onClick={onClose} className="close-btn"><XCircle size={24} /></button>
+    <div style={modalOverlay}>
+      <div style={{ ...modalContent, borderColor: color, boxShadow: `0 0 30px ${color}40` }}>
+        <div style={modalHeader}>
+          <h3 style={{ margin: 0, color: color, textShadow: `0 0 10px ${color}` }}>{title}</h3>
+          <button onClick={onClose} style={{background:'none', border:'none', color:'#fff', cursor:'pointer'}}><XCircle size={24} /></button>
         </div>
-        <div className="modal-body">{children}</div>
+        <div style={modalBody}>{children}</div>
       </div>
     </div>
   );
 };
 
-/* ================= MAIN DASHBOARD ================= */
-const AdminDashboard = () => {
+/* ================= MAIN COMPONENT ================= */
+export default function AdminDashboard() {
   const navigate = useNavigate();
+  const mapRef = useRef(null);
   const [time, setTime] = useState(getCurrentTime());
   const [activeModal, setActiveModal] = useState(null); 
-  const [mapView, setMapView] = useState({ center: [17.385, 78.48], zoom: 13 });
+  
+  // --- MAPBOX STATE ---
+  const [viewState, setViewState] = useState({
+    latitude: 17.385,
+    longitude: 78.48,
+    zoom: 12,
+  });
+  const [routeGeoJSON, setRouteGeoJSON] = useState(null);
+  const [popupInfo, setPopupInfo] = useState(null);
 
   /* --- DATA STATE --- */
   const [hospitals, setHospitals] = useState([
@@ -81,22 +66,27 @@ const AdminDashboard = () => {
   ]);
 
   const [ambulances, setAmbulances] = useState([
-    { id: 1, name: 'Alpha-01', driver: 'Ramesh', regNo: 'TS09AB1234', verified: true, status: 'On Duty', type: 'ALS', base: {lat:17.375,lng:78.47}, position: {lat:17.380,lng:78.475}, route: [], active: true, camUrl: 'http://192.168.1.15:5000/video_feed' },
-    { id: 2, name: 'Beta-04', driver: 'Suresh', regNo: 'TS10XY4567', verified: true, status: 'Idle', type: 'BLS', base: {lat:17.39,lng:78.46}, position: {lat:17.39,lng:78.46}, route: [], active: false, camUrl: null },
-    { id: 3, name: 'Gamma-09', driver: 'Kiran', regNo: 'TS08PQ8899', verified: true, status: 'On Duty', type: 'ALS', base: {lat:17.37,lng:78.49}, position: {lat:17.365,lng:78.485}, route: [], active: true, camUrl: 'http://192.168.1.20:5000/video_feed' },
-    { id: 4, name: 'Delta-12', driver: 'Unknown', regNo: 'AP39EX9999', verified: false, status: 'Pending', type: 'BLS', base: {lat:17.40,lng:78.50}, position: {lat:17.40,lng:78.50}, route: [], active: false, camUrl: null },
+    { id: 1, name: 'Alpha-01', driver: 'Ramesh', regNo: 'TS09AB1234', verified: true, status: 'On Duty', type: 'ALS', position: {lat:17.380,lng:78.475}, active: true, camUrl: 'http://192.168.1.15:5000/video_feed' },
+    { id: 2, name: 'Beta-04', driver: 'Suresh', regNo: 'TS10XY4567', verified: true, status: 'Idle', type: 'BLS', position: {lat:17.39,lng:78.46}, active: false, camUrl: null },
+    { id: 3, name: 'Gamma-09', driver: 'Kiran', regNo: 'TS08PQ8899', verified: true, status: 'On Duty', type: 'ALS', position: {lat:17.365,lng:78.485}, active: true, camUrl: 'http://192.168.1.20:5000/video_feed' },
+    { id: 4, name: 'Delta-12', driver: 'Unknown', regNo: 'AP39EX9999', verified: false, status: 'Pending', type: 'BLS', position: {lat:17.40,lng:78.50}, active: false, camUrl: null },
   ]);
 
   const [reports, setReports] = useState([
     {
-        id: 101, reporter: "Ravi Kumar", time: "10:42 AM", location: { lat: 17.385, lng: 78.48 },
+        id: 101, reporter: "Ravi Kumar", time: "10:42 AM", location: { lat: 17.385, lng: 78.486 },
         img: "https://images.unsplash.com/photo-1599700403969-f77b37d6305f?auto=format&fit=crop&w=300&q=80",
         aiAnalysis: { confidence: 98, severity: "CRITICAL", type: "Vehicle Collision" }
+    },
+    {
+        id: 102, reporter: "System AI", time: "10:45 AM", location: { lat: 17.375, lng: 78.495 },
+        img: "https://thumbs.dreamstime.com/b/car-accident-road-insurance-concept-137286987.jpg",
+        aiAnalysis: { confidence: 85, severity: "MODERATE", type: "Minor Crash" }
     }
   ]);
 
   const [missions, setMissions] = useState([
-    { id: 501, title: "Mission #501", target: { lat: 17.385, lng: 78.48 }, unit: "Alpha-01", status: "EN ROUTE", eta: "4 mins" }
+    { id: 501, title: "Mission #501", target: { lat: 17.385, lng: 78.486 }, unit: "Alpha-01", status: "EN ROUTE", eta: "4 mins", unitLoc: {lat: 17.380, lng: 78.475} }
   ]);
 
   useEffect(() => {
@@ -104,38 +94,72 @@ const AdminDashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
+  /* --- LOGIC: ROUTING (OSRM) --- */
+  const fetchRoute = async (startLoc, endLoc) => {
+    try {
+      const response = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${startLoc.lng},${startLoc.lat};${endLoc.lng},${endLoc.lat}?overview=full&geometries=geojson`
+      );
+      const data = await response.json();
+      
+      if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+        const geometry = data.routes[0].geometry;
+        setRouteGeoJSON({
+          type: "Feature",
+          geometry: geometry
+        });
+
+        // Fit bounds
+        const coords = geometry.coordinates;
+        const bounds = coords.reduce((bounds, coord) => {
+          return bounds.extend(coord);
+        }, new mapboxgl.LngLatBounds(coords[0], coords[0]));
+
+        mapRef.current?.fitBounds(bounds, { padding: 80, duration: 1000 });
+      }
+    } catch (error) {
+      console.error("Routing failed", error);
+    }
+  };
+
   /* --- HANDLERS --- */
   const verifyAmbulance = (id) => {
     setAmbulances(prev => prev.map(amb => amb.id === id ? { ...amb, verified: true, status: 'Idle' } : amb));
-    alert("Ambulance Verified & Added to Fleet");
   };
 
   const handleDispatch = (reportId) => {
     const report = reports.find(r => r.id === reportId);
+    
+    // Find nearest idle ambulance (Simulated: Picking Beta-04)
+    const assignedUnit = ambulances.find(a => a.name === "Beta-04") || ambulances[0];
+
+    // Remove from reports, add to missions
     setReports(prev => prev.filter(r => r.id !== reportId));
+    
     const newMission = {
         id: Date.now(),
         title: `Mission #${Date.now().toString().slice(-4)}`,
         target: report.location,
-        unit: "Beta-04",
+        unit: assignedUnit.name,
         status: "DISPATCHED",
-        eta: "8 mins"
+        eta: "Calculated...",
+        unitLoc: assignedUnit.position
     };
+    
     setMissions([...missions, newMission]);
-    setAmbulances(prev => prev.map(a => a.name === "Beta-04" ? { ...a, status: 'On Duty', active: true } : a));
-    alert("Unit Beta-04 Dispatched!");
+    setAmbulances(prev => prev.map(a => a.name === assignedUnit.name ? { ...a, status: 'On Duty', active: true } : a));
+    
+    // Calculate Route immediately
+    fetchRoute(assignedUnit.position, report.location);
   };
 
   const handleFocusMission = (mission) => {
-    setMapView({ center: [mission.target.lat, mission.target.lng], zoom: 15 });
+    fetchRoute(mission.unitLoc, mission.target);
   };
 
   const handleViewCamera = (url) => {
-    if (url) {
-      window.open(`/live-stream?url=${encodeURIComponent(url)}`, '_blank');
-    } else {
-      alert("Camera feed unavailable or offline.");
-    }
+    if (url) window.open(`/live-stream?url=${encodeURIComponent(url)}`, '_blank');
+    else alert("Camera feed unavailable or offline.");
   };
 
   const handleAddHospital = (e) => {
@@ -147,19 +171,24 @@ const AdminDashboard = () => {
 
     if(!lat || !lng || !name) return alert("Please fill all fields.");
 
-    const newHospital = { id: Date.now(), name, lat, lng };
-    setHospitals([...hospitals, newHospital]); // Add to state
-    setActiveModal(null); // Close modal
+    setHospitals([...hospitals, { id: Date.now(), name, lat, lng }]);
+    setActiveModal(null);
     
-    // Fly map to new location
-    setMapView({ center: [lat, lng], zoom: 15 });
-    alert(`${name} added to database successfully!`);
+    mapRef.current?.flyTo({ center: [lng, lat], zoom: 14, duration: 2000 });
+  };
+
+  /* --- MAP STYLES --- */
+  const routeLayer = {
+    id: "route",
+    type: "line",
+    layout: { "line-join": "round", "line-cap": "round" },
+    paint: { "line-color": "#00ff9d", "line-width": 4, "line-opacity": 0.8 },
   };
 
   return (
     <div style={container}>
       
-      {/* BACKGROUND (Dark Mode) */}
+      {/* BACKGROUND */}
       <div style={bgWrap}>
         <Silk speed={5} scale={1} color="#1a1a1a" noiseIntensity={0.5} />
       </div>
@@ -184,7 +213,7 @@ const AdminDashboard = () => {
             {/* FLEET STATUS */}
             <div style={cardSection}>
                 <div style={sectionHeader}>
-                    <h3><Ambulance size={18}/> Fleet Status</h3>
+                    <h3><Ambulance size={18} style={{marginRight:8}}/> Fleet Status</h3>
                     <span style={{fontSize:10, color:'#00ff9d'}}>● {ambulances.length} Units</span>
                 </div>
                 <div style={scrollList}>
@@ -199,12 +228,11 @@ const AdminDashboard = () => {
                             </div>
                             
                             <div style={{display:'flex', gap: 10}}>
-                                {amb.verified && (
+                                {amb.verified ? (
                                     <button style={btnCam} onClick={() => handleViewCamera(amb.camUrl)}>
                                         <Video size={12} /> View Cam
                                     </button>
-                                )}
-                                {!amb.verified && (
+                                ) : (
                                     <button style={btnVerify} onClick={() => verifyAmbulance(amb.id)}>
                                         <CheckCircle size={12} /> Approve
                                     </button>
@@ -215,7 +243,7 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            {/* ADD HOSPITAL BUTTON (Triggers Modal) */}
+            {/* ADD HOSPITAL */}
             <div style={dbSection}>
                 <button style={btnAddHospital} onClick={() => setActiveModal('addHospital')}>
                     <PlusCircle size={20} />
@@ -224,46 +252,127 @@ const AdminDashboard = () => {
             </div>
         </div>
 
-        {/* COL 2: LIVE MAP */}
+        {/* COL 2: MAPBOX LIVE MAP */}
         <div style={mapPanel}>
             <div style={mapHeaderOverlay}>
                 <span>LIVE SATELLITE TRACKING</span>
                 <span style={{color:'#ff4d4d', animation:'blink 1s infinite'}}>● MONITORING SENSORS</span>
             </div>
             
-            <MapContainer center={mapView.center} zoom={mapView.zoom} style={{ height: '100%', width: '100%' }} zoomControl={false}>
-                <MapController view={mapView} />
-                {/* Dark Tiles for Dark Theme */}
-                <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
-                
+            <Map
+              ref={mapRef}
+              {...viewState}
+              onMove={(evt) => setViewState(evt.viewState)}
+              mapStyle="mapbox://styles/mapbox/navigation-night-v1"
+              mapboxAccessToken={MAPBOX_TOKEN}
+              style={{ width: "100%", height: "100%" }}
+            >
+                <NavigationControl position="bottom-right" />
+
+                {/* --- RENDER REPORTS (ACCIDENTS) --- */}
                 {reports.map(r => (
-                    <Marker key={r.id} position={[r.location.lat, r.location.lng]} icon={accidentIcon}>
-                        <Popup>🚨 REPORTED INCIDENT</Popup>
-                    </Marker>
-                ))}
-                
-                {missions.map(m => (
-                    <Marker key={m.id} position={[m.target.lat, m.target.lng]} icon={missionIcon}>
-                        <Popup>🎯 TARGET: {m.title}</Popup>
+                    <Marker 
+                        key={`rep-${r.id}`} 
+                        latitude={r.location.lat} 
+                        longitude={r.location.lng}
+                        anchor="bottom"
+                        onClick={e => {
+                            e.originalEvent.stopPropagation();
+                            setPopupInfo({ ...r, type: 'incident' });
+                        }}
+                    >
+                        <img 
+                            src="https://cdn-icons-png.flaticon.com/512/564/564619.png" 
+                            width="40" 
+                            alt="Crash" 
+                            style={{filter: 'drop-shadow(0 0 8px red)', cursor:'pointer'}}
+                        />
                     </Marker>
                 ))}
 
+                {/* --- RENDER AMBULANCES --- */}
                 {ambulances.map(amb => (
-                    <Marker key={'m'+amb.id} position={[amb.position.lat, amb.position.lng]} icon={ambulanceIcon}>
-                        <Popup>🚑 {amb.name} ({amb.status})</Popup>
+                    <Marker 
+                        key={`amb-${amb.id}`} 
+                        latitude={amb.position.lat} 
+                        longitude={amb.position.lng}
+                        anchor="bottom"
+                        onClick={e => {
+                            e.originalEvent.stopPropagation();
+                            setPopupInfo({ ...amb, type: 'ambulance' });
+                        }}
+                    >
+                        <img 
+                            src="https://cdn-icons-png.flaticon.com/512/2967/2967350.png" 
+                            width="35" 
+                            alt="Ambulance"
+                            style={{cursor:'pointer'}} 
+                        />
                     </Marker>
                 ))}
-                
-                {hospitals.map((h) => (
-                    <Marker key={'h'+h.id} position={[h.lat, h.lng]} icon={hospitalIcon}>
-                        <Popup>🏥 {h.name}</Popup>
+
+                {/* --- RENDER HOSPITALS --- */}
+                {hospitals.map(h => (
+                    <Marker 
+                        key={`hosp-${h.id}`} 
+                        latitude={h.lat} 
+                        longitude={h.lng}
+                        anchor="bottom"
+                        onClick={e => {
+                            e.originalEvent.stopPropagation();
+                            setPopupInfo({ ...h, type: 'hospital' });
+                        }}
+                    >
+                        <img 
+                            src="https://cdn-icons-png.flaticon.com/512/4320/4320371.png" 
+                            width="35" 
+                            alt="Hospital" 
+                            style={{cursor:'pointer'}}
+                        />
                     </Marker>
                 ))}
-                
+
+                {/* --- RENDER MISSIONS (TARGETS) --- */}
                 {missions.map(m => (
-                     <Polyline key={'line'+m.id} positions={[[17.375, 78.47], [m.target.lat, m.target.lng]]} color="#007bff" dashArray="5, 10" />
+                    <Marker 
+                        key={`mis-${m.id}`} 
+                        latitude={m.target.lat} 
+                        longitude={m.target.lng}
+                        anchor="bottom"
+                    >
+                        <img 
+                            src="https://cdn-icons-png.flaticon.com/512/1533/1533913.png" 
+                            width="40" 
+                            alt="Target" 
+                            className="pulse-slow"
+                        />
+                    </Marker>
                 ))}
-            </MapContainer>
+
+                {/* --- ROUTE LAYER --- */}
+                {routeGeoJSON && (
+                    <Source type="geojson" data={routeGeoJSON}>
+                        <Layer {...routeLayer} />
+                    </Source>
+                )}
+
+                {/* --- POPUPS --- */}
+                {popupInfo && (
+                    <Popup
+                        anchor="top"
+                        longitude={popupInfo.lng || popupInfo.location?.lng || popupInfo.position?.lng}
+                        latitude={popupInfo.lat || popupInfo.location?.lat || popupInfo.position?.lat}
+                        onClose={() => setPopupInfo(null)}
+                        closeButton={false}
+                    >
+                        <div style={{color:'black', padding:'5px'}}>
+                            <strong>{popupInfo.name || popupInfo.reporter}</strong>
+                            <div style={{fontSize:'0.8em'}}>{popupInfo.type === 'incident' ? popupInfo.aiAnalysis.severity : popupInfo.status || 'Medical Facility'}</div>
+                        </div>
+                    </Popup>
+                )}
+
+            </Map>
         </div>
 
         {/* COL 3: ALERTS & MISSIONS */}
@@ -272,7 +381,7 @@ const AdminDashboard = () => {
             {/* REPORTS */}
             <div style={{...cardSection, borderColor: '#ff4d4d'}}>
                 <div style={sectionHeaderRed}>
-                    <h3><ShieldAlert size={18}/> Incoming Alerts</h3>
+                    <h3><ShieldAlert size={18} style={{marginRight:8}}/> Incoming Alerts</h3>
                     <span style={badgeRed}>{reports.length}</span>
                 </div>
                 <div style={scrollList}>
@@ -302,7 +411,7 @@ const AdminDashboard = () => {
             {/* MISSIONS */}
             <div style={cardSection}>
                 <div style={sectionHeader}>
-                    <h3><Navigation size={18}/> Active Missions</h3>
+                    <h3><Navigation size={18} style={{marginRight:8}}/> Active Missions</h3>
                 </div>
                 <div style={scrollList}>
                     {missions.map(m => (
@@ -314,7 +423,7 @@ const AdminDashboard = () => {
                             <div style={{fontSize:12, color:'#888', marginTop:5}}>
                                 Unit: <strong>{m.unit}</strong> • ETA: {m.eta}
                             </div>
-                            <div style={clickHint}>Click to Track</div>
+                            <div style={clickHint}>Click to Track Route</div>
                         </div>
                     ))}
                 </div>
@@ -374,7 +483,7 @@ const AdminDashboard = () => {
       </style>
     </div>
   );
-};
+}
 
 /* ================= STYLES ================= */
 const container = { height: '100vh', width: '100vw', color: 'white', fontFamily: "'Inter', sans-serif", overflow: 'hidden', background: '#000' };
@@ -413,7 +522,6 @@ const btnDispatch = { width: '100%', background: '#ff4d4d', border: 'none', colo
 const missionCard = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '10px', cursor: 'pointer', marginBottom: '10px', transition: '0.2s' };
 const clickHint = { fontSize: '9px', textAlign: 'center', marginTop: '5px', opacity: 0.4, fontStyle: 'italic' };
 
-const btnAddLarge = { width: '100%', padding: '15px', background: 'rgba(76, 201, 240, 0.1)', border: '1px dashed rgba(76, 201, 240, 0.3)', borderRadius: '12px', color: '#4cc9f0', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: '0.2s' };
 const btnAddHospital = { width: '100%', padding: '20px', background: 'rgba(76, 201, 240, 0.1)', border: '1px dashed rgba(76, 201, 240, 0.3)', borderRadius: '16px', color: '#4cc9f0', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: '0.2s' };
 
 const mapHeaderOverlay = { position: 'absolute', top: 20, left: 20, zIndex: 500, background: 'rgba(0,0,0,0.8)', padding: '8px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', display: 'flex', gap: '15px', border: '1px solid rgba(255,255,255,0.1)' };
@@ -427,5 +535,3 @@ const label = { display: 'block', fontSize: '12px', fontWeight: '600', marginBot
 const input = { width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #333', fontSize: '14px', background: '#222', outline: 'none', color: 'white' };
 const inputWithIcon = { display: 'flex', alignItems: 'center', gap: '10px', background: '#222', border: '1px solid #333', padding: '0 10px', borderRadius: '6px' };
 const btnPrimary = { background: '#4cc9f0', color: 'black', border: 'none', padding: '12px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '10px' };
-
-export default AdminDashboard;
