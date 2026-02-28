@@ -1,0 +1,67 @@
+.user-profile {
+  width: 160px;          /* was 131px */
+  height: 51px;
+  border-radius: 15px;
+  cursor: pointer;
+  background: linear-gradient(
+    to bottom right,
+    #2e8eff 0%,
+    rgba(46, 142, 255, 0) 30%
+  );
+  background-color: rgba(46, 142, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* smooth hover & click animation */
+  transition:
+    transform 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    background-color 0.2s ease-out;
+}
+
+.user-profile-inner {
+  width: 156px;          /* was 127px */
+  height: 47px;
+  border-radius: 13px;
+  background-color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;             /* was 15px – gives text a bit more room */
+  color: #fff;
+  font-weight: 600;
+  transition:
+    transform 0.15s ease-out,
+    box-shadow 0.15s ease-out;
+}
+
+/* hover: lift slightly and glow */
+.user-profile:hover,
+.user-profile:focus {
+  background-color: rgba(46, 142, 255, 0.7);
+  box-shadow: 0 0 16px rgba(46, 142, 255, 0.6);
+  outline: none;
+}
+
+.user-profile:hover .user-profile-inner,
+.user-profile:focus .user-profile-inner {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+/* click/active: pressed effect */
+.user-profile:active {
+  transform: translateY(2px) scale(0.97);
+  box-shadow: 0 0 8px rgba(46, 142, 255, 0.4);
+}
+
+.user-profile:active .user-profile-inner {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+}
+
+.user-profile-inner svg {
+  width: 27px;
+  height: 27px;
+  fill: #fff;
+}

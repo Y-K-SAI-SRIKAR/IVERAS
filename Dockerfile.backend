@@ -1,0 +1,27 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies needed for Pillow, bcrypt, etc.
+RUN apt-get update && apt-get install -y gcc build-essential libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY backend /app/backend
+COPY AiAgents /app/AiAgents
+
+# Copy and set up the start script
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
+# Environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
+
+EXPOSE 8080
+
+CMD ["/app/start.sh"]
