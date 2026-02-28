@@ -29,6 +29,16 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 UPLOAD_FOLDER = 'static/Accidentuploads'
 # os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Disabled for Vercel Serverless
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# ================================================================
+#  TEST ROUTE
+# ================================================================
+@app.route("/")
+def index():
+    return f"IVERAS Backend running with gemini-3-flash-preview", 200
+
+@app.route("/api/health-check")
+def health_check():
+    return jsonify({"status": "running", "model": "gemini-3-flash-preview"}), 200
 
 # ================================================================
 #  AI AGENT URLS
