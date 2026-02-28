@@ -1,4 +1,4 @@
-Flask
+Flask>=2.0.0
 Flask-PyMongo
 Flask-Cors
 python-dotenv
@@ -7,4 +7,4 @@ pymongo
 requests
 Pillow
 gunicorn
-google-generativeai
+google-generativeai>=0.8.0
