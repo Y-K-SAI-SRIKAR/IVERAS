@@ -34,11 +34,13 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # ================================================================
 @app.route("/")
 def index():
-    return f"IVERAS Backend running with gemini-3-flash-preview", 200
+    import google.generativeai as genai_lib
+    return f"<h1>IVERAS Backend Deployment V2</h1><p>Model Configured: <b>gemini-3-flash-preview</b></p><p>SDK Version: {genai_lib.__version__}</p><p>Deployment ID: 123456</p>", 200
 
 @app.route("/api/health-check")
 def health_check():
-    return jsonify({"status": "running", "model": "gemini-3-flash-preview"}), 200
+    import google.generativeai as genai_lib
+    return jsonify({"status": "running", "model": "gemini-3-flash-preview", "sdk": genai_lib.__version__, "deploy": 123456}), 200
 
 # ================================================================
 #  AI AGENT URLS
