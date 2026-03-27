@@ -1083,7 +1083,7 @@ function VideoSec() {
         <p style={{ marginTop: 6, fontSize: "0.9rem", color: "var(--t45)" }}>Real hardware. Real roads. Real results.</p>
       </div>
       <div className="iv-vid-frame">
-        <video ref={vRef} src="/demo.mp4" muted loop playsInline />
+        <video ref={vRef} src="https://drive.google.com/uc?export=download&id=1fCE5pV2d1hCunMBy4GOWW4-GGV8-UMp-" muted loop playsInline />
       </div>
     </div>
   );
