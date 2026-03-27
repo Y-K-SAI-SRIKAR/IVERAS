@@ -11,8 +11,8 @@ import ExplorePage from './pages/ExplorePage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import HelperDashboard from './pages/HelperDashboard.jsx';
 import HospitalDashboard from './pages/HospitalOS.jsx';
-import HospitalOS from './pages/HospitalOS.jsx';
 import PatientPortal from './pages/PatientPortal.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -26,16 +26,28 @@ createRoot(document.getElementById('root')).render(
         <Route path="/register" element={<RegisterPage />} />
 
         {/* DASHBOARDS */}
-        <Route path="/dashboard" element={<LoginDashboard />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/helper" element={<HelperDashboard />} />
-        <Route path="/hospital" element={<HospitalDashboard />} />
-
-        {/* HOSPITAL OS — staff-facing clinical dashboard */}
-        <Route path="/hospital-os" element={<HospitalOS />} />
+        <Route 
+          path="/dashboard" 
+          element={<ProtectedRoute allowedRoles={["User"]}><LoginDashboard /></ProtectedRoute>} 
+        />
+        <Route 
+          path="/admin" 
+          element={<ProtectedRoute allowedRoles={["Admin"]}><AdminDashboard /></ProtectedRoute>} 
+        />
+        <Route 
+          path="/helper" 
+          element={<ProtectedRoute allowedRoles={["Responder"]}><HelperDashboard /></ProtectedRoute>} 
+        />
+        <Route 
+          path="/hospital" 
+          element={<ProtectedRoute allowedRoles={["Hospital"]}><HospitalDashboard /></ProtectedRoute>} 
+        />
 
         {/* PATIENT PORTAL — patient-facing health records & billing */}
-        <Route path="/patient" element={<PatientPortal />} />
+        <Route 
+          path="/patient" 
+          element={<ProtectedRoute allowedRoles={["Patient"]}><PatientPortal /></ProtectedRoute>} 
+        />
 
         {/* EXPLORE */}
         <Route path="/ExplorePage" element={<ExplorePage />} />

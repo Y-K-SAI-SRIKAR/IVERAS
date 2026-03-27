@@ -723,15 +723,31 @@ function UserFlow({ role, onSuccess }) {
 
   const progress = ((step / (role.steps.length - 1)) * 100);
 
-  const next = () => {
+  const next = async () => {
     if (step === 0 && !validateStep0()) return;
     if (step === 1 && !/^IVER-[A-Z0-9]{4}-[A-Z0-9]{4}$/i.test(form.serial)) {
       setErrors({ serial: "Invalid serial format. Expected IVER-XXXX-XXXX" });
       return;
     }
     setErrors({});
-    setLoading(true);
-    setTimeout(() => { setLoading(false); setStep(s => s + 1); }, 800);
+    if (step < role.steps.length - 1) {
+      setLoading(true);
+      setTimeout(() => { setLoading(false); setStep(s => s + 1); }, 800);
+    } else {
+      setLoading(true);
+      try {
+        const res = await fetch("http://localhost:5000/api/register", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: form.name, email: form.email, password: form.password, userType: "User" })
+        });
+        const data = await res.json();
+        setLoading(false);
+        if (res.ok) {
+          localStorage.setItem("user", JSON.stringify(data));
+          onSuccess(data.redirectUrl);
+        } else alert(data.error);
+      } catch (err) { setLoading(false); alert("Server error"); }
+    }
   };
 
   if (step === role.steps.length) return (
@@ -909,11 +925,27 @@ function ResponderFlow({ role, onSuccess }) {
     return Object.keys(err).length === 0;
   };
 
-  const next = () => {
+  const next = async () => {
     if (step === 0 && !validateStep0()) return;
     setErrors({});
-    setLoading(true);
-    setTimeout(() => { setLoading(false); setStep(s => s + 1); }, 900);
+    if (step < role.steps.length - 1) {
+      setLoading(true);
+      setTimeout(() => { setLoading(false); setStep(s => s + 1); }, 900);
+    } else {
+      setLoading(true);
+      try {
+        const res = await fetch("http://localhost:5000/api/register", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: form.name, email: form.email, password: "ResponderPassword123", userType: "Responder" })
+        });
+        const data = await res.json();
+        setLoading(false);
+        if (res.ok) {
+          localStorage.setItem("user", JSON.stringify(data));
+          onSuccess(data.redirectUrl);
+        } else alert(data.error);
+      } catch (err) { setLoading(false); alert("Server error"); }
+    }
   };
 
   const progress = ((step / (role.steps.length - 1)) * 100);
@@ -1003,7 +1035,26 @@ function HospitalFlow({ role, onSuccess }) {
   const [agreedBAA, setAgreedBAA] = useState(false);
   const [agreedNHA, setAgreedNHA] = useState(false);
 
-  const next = () => { setLoading(true); setTimeout(() => { setLoading(false); setStep(s => s + 1); }, 900); };
+  const next = async () => {
+    if (step < role.steps.length - 1) {
+      setLoading(true);
+      setTimeout(() => { setLoading(false); setStep(s => s + 1); }, 900);
+    } else {
+      setLoading(true);
+      try {
+        const res = await fetch("http://localhost:5000/api/register", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: "Hospital Admin", email: "admin@hospital.com", password: "HospitalPassword123", userType: "Hospital" })
+        });
+        const data = await res.json();
+        setLoading(false);
+        if (res.ok) {
+          localStorage.setItem("user", JSON.stringify(data));
+          onSuccess(data.redirectUrl);
+        } else alert(data.error);
+      } catch (err) { setLoading(false); alert("Server error"); }
+    }
+  };
 
   const progress = ((step / (role.steps.length - 1)) * 100);
 
@@ -1119,7 +1170,26 @@ function PatientFlow({ role, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState("");
 
-  const next = () => { setLoading(true); setTimeout(() => { setLoading(false); setStep(s => s + 1); }, 900); };
+  const next = async () => {
+    if (step < role.steps.length - 1) {
+      setLoading(true);
+      setTimeout(() => { setLoading(false); setStep(s => s + 1); }, 900);
+    } else {
+      setLoading(true);
+      try {
+        const res = await fetch("http://localhost:5000/api/register", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: "Patient Name", email: "patient@example.com", password: "PatientPassword123", userType: "Patient" })
+        });
+        const data = await res.json();
+        setLoading(false);
+        if (res.ok) {
+          localStorage.setItem("user", JSON.stringify(data));
+          onSuccess(data.redirectUrl);
+        } else alert(data.error);
+      } catch (err) { setLoading(false); alert("Server error"); }
+    }
+  };
 
   const progress = ((step / (role.steps.length - 1)) * 100);
 
@@ -1308,10 +1378,10 @@ export default function RegisterPage() {
                   <SuccessScreen role={role} onReset={() => { setDone(false); setSelectedRole(null); }} navigate={navigate} />
                 ) : (
                   <>
-                    {role.id === "user" && <UserFlow role={role} onSuccess={() => setDone(true)} />}
-                    {role.id === "responder" && <ResponderFlow role={role} onSuccess={() => setDone(true)} />}
-                    {role.id === "hospital" && <HospitalFlow role={role} onSuccess={() => setDone(true)} />}
-                    {role.id === "patient" && <PatientFlow role={role} onSuccess={() => setDone(true)} />}
+                    {role.id === "user" && <UserFlow role={role} onSuccess={(url) => url && typeof url === "string" ? navigate(url) : setDone(true)} />}
+                    {role.id === "responder" && <ResponderFlow role={role} onSuccess={(url) => url && typeof url === "string" ? navigate(url) : setDone(true)} />}
+                    {role.id === "hospital" && <HospitalFlow role={role} onSuccess={(url) => url && typeof url === "string" ? navigate(url) : setDone(true)} />}
+                    {role.id === "patient" && <PatientFlow role={role} onSuccess={(url) => url && typeof url === "string" ? navigate(url) : setDone(true)} />}
                   </>
                 )}
               </div>
