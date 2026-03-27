@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* ================= ROOT ================= */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -21,20 +23,19 @@ body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   overflow-x: hidden;
+  background-color: black;
 }
 
-/* 🔥 allow scrolling – DO NOT hide overflow here */
 #root {
   width: 100%;
-  min-height: 100%;
-  overflow: visible;
-}
-
-/* body base */
-body {
-  background: black;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  /* max-width: none completely overrides the default Vite 1280px container */
+  max-width: none;
+  text-align: left;
   overflow-x: hidden;
 }
 
@@ -71,16 +72,13 @@ button:hover {
 .loading {
   position: fixed;
   inset: 0;
-
   display: flex;
   justify-content: center;
   align-items: center;
-
   background: black;
   z-index: 9999;
-
   opacity: 1;
-  transition: opacity 0.5s ease; /* smooth fade */
+  transition: opacity 0.5s ease;
 }
 
 .loading svg {
@@ -88,7 +86,6 @@ button:hover {
   height: 60px;
 }
 
-/* shared */
 .loading svg polyline {
   fill: none;
   stroke-width: 3;
@@ -96,12 +93,10 @@ button:hover {
   stroke-linejoin: round;
 }
 
-/* back faint line */
 .loading svg polyline#back {
   stroke: #ff4d5033;
 }
 
-/* animated front line */
 .loading svg polyline#front {
   stroke: #ff4d4f;
   stroke-dasharray: 48, 144;
@@ -109,7 +104,6 @@ button:hover {
   animation: dash_682 1.4s linear infinite;
 }
 
-/* animation */
 @keyframes dash_682 {
   72.5% {
     opacity: 0;
@@ -120,7 +114,9 @@ button:hover {
   }
 }
 
-/* HIDE SCROLLBARS VISUALLY (but keep scroll working) */
+/* ================= UTILITIES ================= */
+
+/* HIDE SCROLLBARS VISUALLY */
 ::-webkit-scrollbar {
   width: 0px;
   height: 0px;
@@ -134,36 +130,14 @@ body {
   -ms-overflow-style: none;
 }
 
-/* 🔁 ensure no default margins re‑added */
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
-/* 🔥 REMOVE SHINYTEXT BASELINE / SHINE LINE */
+/* SHINYTEXT FIX */
 .shiny-text::before,
 .shiny-text::after {
   display: none !important;
   content: none !important;
 }
 
-/* final root sizing */
-html,
-body,
-#root {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  min-height: 100vh;
-}
-
-/* optional but helps avoid weird scroll space */
-body {
-  overflow-x: hidden;
-  background: black;
-}
-
+/* LOGO LOOP */
 .logo-loop svg {
   color: #e5e7eb;
 }
@@ -172,3 +146,107 @@ body {
   color: #ffffff;
 }
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TRUST BADGES (Hero)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.iv-trust-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  font-family: var(--fm, monospace);
+  font-size: 0.75rem;
+  color: #dcdcdc;
+  letter-spacing: 1px;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.iv-trust-badge:hover {
+  background: rgba(245, 158, 11, 0.08);
+  /* Amber glow */
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fff;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HOW IT WORKS (Steps)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.iv-step-card {
+  background: #0a0a0f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.iv-step-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.iv-step-num {
+  font-family: var(--fd, sans-serif);
+  font-size: 3rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.05);
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  pointer-events: none;
+}
+
+.iv-step-card h3 {
+  font-family: var(--fd, sans-serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.iv-step-card p {
+  font-size: 0.95rem;
+  color: #a0a0a0;
+  line-height: 1.6;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   USE CASES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.iv-use-case {
+  border-radius: 16px;
+  padding: 32px 24px;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: grayscale(80%);
+}
+
+.iv-use-case:hover {
+  transform: scale(1.02);
+  filter: grayscale(0%);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.iv-use-case h4 {
+  font-family: var(--fd, sans-serif);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.iv-use-case p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}

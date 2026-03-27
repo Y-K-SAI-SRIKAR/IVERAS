@@ -38,7 +38,7 @@ const ExplorePage = () => {
 
       {/* Page content + footer (scrolls normally) */}
       <div style={styles.content}>
-        <h1 style={styles.heading}>THE IVERAS COMMUNITY</h1>
+        <h1 style={styles.heading}>THE NexVitals COMMUNITY</h1>
 
         {/* Typing effect above cards */}
         <div style={styles.typingWrapper}>
@@ -47,7 +47,7 @@ const ExplorePage = () => {
               "Building Intelligent Emergency Response Systems.",
               "Connecting Vehicles, Through Cloud, and Automation.",
               "Driven by Innovation. Focused on Saving Lives.",
-              "Welcome to the IVERAS community!",
+              "Welcome to the NexVitals community!",
               "Explore how each member powers this mission.",
             ]}
             typingSpeed={75}
@@ -84,7 +84,7 @@ const ExplorePage = () => {
               <h3>Founder & Project Lead</h3>
               <p>
                 I lead the overall technical direction and system architecture of
-                IVERAS. I design and establish the complete hardware
+                NexVitals. I design and establish the complete hardware
                 infrastructure, integrating ESP32-based vehicle modules and a
                 Raspberry Pi – powered automated ambulance. I ensure reliable
                 real-time data flow between sensors, embedded controllers, and
@@ -94,7 +94,7 @@ const ExplorePage = () => {
                 I develop and optimize YOLO v8 - based computer vision models for
                 intelligent path planning, obstacle detection, and route
                 optimization. I continuously evaluate system performance under
-                dynamic and time-critical conditions, ensuring that IVERAS meets
+                dynamic and time-critical conditions, ensuring that NexVitals meets
                 reliability, safety, and scalability requirements for real-world
                 emergency response scenarios.
               </p>
@@ -123,7 +123,7 @@ const ExplorePage = () => {
               <h3>Co-Founder & Vice Project Lead</h3>
               <p>
                 I lead website development, workflow management, and user
-                experience design for IVERAS. I design intuitive frontend
+                experience design for NexVitals. I design intuitive frontend
                 workflows that align with real-time system operations and user
                 needs. I focus on creating a consistent, accessible, and efficient
                 user experience for operators, administrators, and stakeholders.
@@ -160,7 +160,7 @@ const ExplorePage = () => {
               <h3>Co-Founder – Databases & Web Systems</h3>
               <p>
                 I design and manage the database architecture that supports the
-                IVERAS platform. I ensure data integrity, performance
+                NexVitals platform. I ensure data integrity, performance
                 optimization, and scalability for real-time data ingestion and
                 retrieval. I focus on building structured and reliable data
                 systems that support continuous system operation and future
@@ -198,7 +198,7 @@ const ExplorePage = () => {
               <h3>Co-Founder – Automation, Cloud & AI Systems</h3>
               <p>
                 I design and implement the automation and cloud infrastructure
-                that supports the IVERAS platform. I deploy scalable cloud
+                that supports the NexVitals platform. I deploy scalable cloud
                 services for real-time data processing, monitoring, and
                 orchestration. I automate deployment pipelines and system
                 workflows to ensure high availability, reliability, and rapid

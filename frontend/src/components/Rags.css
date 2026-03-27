@@ -1,3 +1,5 @@
+/* ── ORIGINAL TILTED CARD STYLES (unchanged) ── */
+
 .tilted-card-figure {
   position: relative;
   width: 300px;
@@ -31,16 +33,6 @@
   transform-style: preserve-3d;
 }
 
-.tilted-card-img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  object-fit: cover;
-  border-radius: 15px;
-  will-change: transform;
-  transform: translateZ(0);
-}
-
 .tilted-card-overlay {
   position: absolute;
   top: 0;
@@ -62,4 +54,122 @@
   color: #2d2d2d;
   opacity: 0;
   z-index: 3;
+}
+
+/* ── AVATAR FACE (replaces .tilted-card-img) ── */
+
+.tcard-face {
+  border-radius: 15px;
+  background: linear-gradient(145deg, #0d0d0d 0%, #1a1a1a 100%);
+  border: 1.5px solid var(--accent-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 28px 20px;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.tcard-glow {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-dim), transparent 70%);
+  pointer-events: none;
+}
+
+.tcard-circle {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 2px solid var(--accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.tcard-circle::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px dashed var(--accent-border);
+  animation: tcard-spin 10s linear infinite;
+}
+
+@keyframes tcard-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.tcard-initial {
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: var(--accent);
+  font-family: 'Poppins', sans-serif;
+  line-height: 1;
+  user-select: none;
+}
+
+.tcard-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  line-height: 1.35;
+  letter-spacing: 0.3px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.tcard-role {
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+.tcard-divider {
+  width: 55%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-border), transparent);
+  flex-shrink: 0;
+}
+
+.tcard-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+}
+
+.tcard-tag {
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  white-space: nowrap;
 }

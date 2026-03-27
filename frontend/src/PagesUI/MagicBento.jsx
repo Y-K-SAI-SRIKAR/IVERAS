@@ -35,7 +35,7 @@ const cardData = [
     color: '#060010',
     title: 'USER DETAILS',
     description: '',
-    label: 'IVERAS ID CARD',
+    label: 'NexVitals ID CARD',
     key: 'id',
   },
   {
@@ -174,7 +174,7 @@ const renderFeatureContent = (card, index, featureHandlers = {}) => {
                 justifyContent: 'center',
               }}
             >
-              <Button>IVERAS ID</Button>
+              <Button>NexVitals ID</Button>
             </div>
           )}
         </>

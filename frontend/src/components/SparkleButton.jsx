@@ -18,7 +18,7 @@ const SparkleButton = ({ onClick, children }) => {
         </svg>
 
         <span className="text">
-          {children ?? "Ask IVERAS Ai"}
+          {children ?? "Ask NexVitals Ai"}
         </span>
       </button>
 

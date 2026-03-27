@@ -2,128 +2,89 @@ import { useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 import './Rags.css';
 
-const springValues = {
-  damping: 30,
-  stiffness: 100,
-  mass: 2
+const springValues = { damping: 30, stiffness: 100, mass: 2 };
+
+const member = {
+  initial: 'R',
+  name: 'Sreenivasan Venkata Raghavan',
+  role: 'Founder & Project Lead',
+  tags: ['Hardware', 'Computer Vision', 'Architecture'],
+  accent: '#FFD700',
+  accentDim: 'rgba(255,215,0,0.10)',
+  accentBorder: 'rgba(255,215,0,0.30)',
 };
 
-export default function TiltedCard({
-  imageSrc='./rags.png',
-  altText = 'Tilted card image',
-  captionText = 'S. V. RAGHAVAN',
+export default function Rags({
+  captionText = member.name,
   containerHeight = '300px',
   containerWidth = '240px',
   imageHeight = '300px',
   imageWidth = '260px',
   scaleOnHover = 1.1,
   rotateAmplitude = 14,
-  showMobileWarning = true,
+  showMobileWarning = false,
   showTooltip = true,
-  overlayContent = null,
-  displayOverlayContent = false
 }) {
   const ref = useRef(null);
-
-  const x = useMotionValue();
-  const y = useMotionValue();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
   const rotateX = useSpring(useMotionValue(0), springValues);
   const rotateY = useSpring(useMotionValue(0), springValues);
   const scale = useSpring(1, springValues);
   const opacity = useSpring(0);
-  const rotateFigcaption = useSpring(0, {
-    stiffness: 350,
-    damping: 30,
-    mass: 1
-  });
-
+  const rotateFigcaption = useSpring(0, { stiffness: 350, damping: 30, mass: 1 });
   const [lastY, setLastY] = useState(0);
 
   function handleMouse(e) {
     if (!ref.current) return;
-
     const rect = ref.current.getBoundingClientRect();
     const offsetX = e.clientX - rect.left - rect.width / 2;
     const offsetY = e.clientY - rect.top - rect.height / 2;
-
-    const rotationX = (offsetY / (rect.height / 2)) * -rotateAmplitude;
-    const rotationY = (offsetX / (rect.width / 2)) * rotateAmplitude;
-
-    rotateX.set(rotationX);
-    rotateY.set(rotationY);
-
+    rotateX.set((offsetY / (rect.height / 2)) * -rotateAmplitude);
+    rotateY.set((offsetX / (rect.width / 2)) * rotateAmplitude);
     x.set(e.clientX - rect.left);
     y.set(e.clientY - rect.top);
-
-    const velocityY = offsetY - lastY;
-    rotateFigcaption.set(-velocityY * 0.6);
+    rotateFigcaption.set(-(offsetY - lastY) * 0.6);
     setLastY(offsetY);
   }
 
-  function handleMouseEnter() {
-    scale.set(scaleOnHover);
-    opacity.set(1);
-  }
-
+  function handleMouseEnter() { scale.set(scaleOnHover); opacity.set(1); }
   function handleMouseLeave() {
-    opacity.set(0);
-    scale.set(1);
-    rotateX.set(0);
-    rotateY.set(0);
-    rotateFigcaption.set(0);
+    opacity.set(0); scale.set(1);
+    rotateX.set(0); rotateY.set(0); rotateFigcaption.set(0);
   }
 
   return (
     <figure
       ref={ref}
       className="tilted-card-figure"
-      style={{
-        height: containerHeight,
-        width: containerWidth
-      }}
+      style={{ height: containerHeight, width: containerWidth }}
       onMouseMove={handleMouse}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {showMobileWarning && (
-        <div className="tilted-card-mobile-alert">This effect is not optimized for mobile. Check on desktop.</div>
+        <div className="tilted-card-mobile-alert">This effect is not optimized for mobile.</div>
       )}
-
       <motion.div
         className="tilted-card-inner"
-        style={{
-          width: imageWidth,
-          height: imageHeight,
-          rotateX,
-          rotateY,
-          scale
-        }}
+        style={{ width: imageWidth, height: imageHeight, rotateX, rotateY, scale }}
       >
-        <motion.img
-          src={imageSrc}
-          alt={altText}
-          className="tilted-card-img"
-          style={{
-            width: imageWidth,
-            height: imageHeight
-          }}
-        />
-
-        {displayOverlayContent && overlayContent && (
-          <motion.div className="tilted-card-overlay">{overlayContent}</motion.div>
-        )}
+        <div className="tcard-face" style={{ '--accent': member.accent, '--accent-dim': member.accentDim, '--accent-border': member.accentBorder, width: imageWidth, height: imageHeight }}>
+          <div className="tcard-glow" />
+          <div className="tcard-circle">
+            <span className="tcard-initial">{member.initial}</span>
+          </div>
+          <div className="tcard-name">{member.name}</div>
+          <div className="tcard-role">{member.role}</div>
+          <div className="tcard-divider" />
+          <div className="tcard-tags">
+            {member.tags.map(t => <span key={t} className="tcard-tag">{t}</span>)}
+          </div>
+        </div>
       </motion.div>
-
       {showTooltip && (
-        <motion.figcaption
-          className="tilted-card-caption"
-          style={{
-            x,
-            y,
-            opacity,
-            rotate: rotateFigcaption
-          }}
-        >
+        <motion.figcaption className="tilted-card-caption" style={{ x, y, opacity, rotate: rotateFigcaption }}>
           {captionText}
         </motion.figcaption>
       )}

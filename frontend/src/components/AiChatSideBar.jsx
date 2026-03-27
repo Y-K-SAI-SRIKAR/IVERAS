@@ -353,7 +353,7 @@ export default function AiChatSidebar({ isOpen, onClose }) {
             </button>
           </div>
           <div style={{ textAlign: "center", marginTop: 10, color: "#3a3a4a", fontSize: 11 }}>
-            Powered by IVERAS · Press Enter to send
+            Powered by NexVitals · Press Enter to send
           </div>
         </div>
       </div>

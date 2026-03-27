@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 
-
 import App from './App.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import LoginDashboard from './pages/UserDashboard.jsx';
@@ -11,7 +10,9 @@ import AdminDashboard from './pages/AdminDashboard.jsx';
 import ExplorePage from './pages/ExplorePage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import HelperDashboard from './pages/HelperDashboard.jsx';
-import AmbulanceStream from './pages/AmbulanceStream.jsx'; // <--- IMPORT THIS
+import HospitalDashboard from './pages/HospitalOS.jsx';
+import HospitalOS from './pages/HospitalOS.jsx';
+import PatientPortal from './pages/PatientPortal.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -28,9 +29,13 @@ createRoot(document.getElementById('root')).render(
         <Route path="/dashboard" element={<LoginDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/helper" element={<HelperDashboard />} />
+        <Route path="/hospital" element={<HospitalDashboard />} />
 
-        {/* LIVE STREAMING */}
-        <Route path="/live-stream" element={<AmbulanceStream />} /> {/* <--- NEW ROUTE */}
+        {/* HOSPITAL OS — staff-facing clinical dashboard */}
+        <Route path="/hospital-os" element={<HospitalOS />} />
+
+        {/* PATIENT PORTAL — patient-facing health records & billing */}
+        <Route path="/patient" element={<PatientPortal />} />
 
         {/* EXPLORE */}
         <Route path="/ExplorePage" element={<ExplorePage />} />

@@ -1,97 +1,98 @@
-/* The ScrollStack section itself – no inner scrolling */
 .scroll-stack-scroller {
   position: relative;
   width: 100%;
-  height: auto;              /* grows with content */
-  overflow: visible;         /* window scroll drives everything */
-  overscroll-behavior: auto;
-  -webkit-overflow-scrolling: auto;
-  scroll-behavior: auto;
-  -webkit-transform: none;
-  transform: none;
-  will-change: auto;
+  height: auto;
+  overflow: visible;
 }
 
-/* Vertical space around the whole stack */
 .scroll-stack-inner {
-  padding: 8vh 3rem 10vh;    /* adjust to move stack up/down overall */
+  padding: 4vh 0 10vh;
   min-height: 100vh;
 }
 
-/* Optional wrapper – keep simple */
-.scroll-stack-card-wrapper {
-  position: relative;
-}
-
-/* Individual cards – visual style only */
+/* ─────────────────────────────────────────────
+   Individual cards
+   Key fixes:
+   1. min-height instead of fixed height — content never gets clipped
+   2. Solid background-color so underlying cards never bleed through
+   3. No will-change on every card — only set it when JS starts moving them
+   4. transform-style flat (preserve-3d was causing compositor layer splits on mobile)
+───────────────────────────────────────────── */
 .scroll-stack-card {
   position: relative;
-  height: 18rem;
+  min-height: 18rem;
+  /* was height:18rem — fixed clipped tall content */
+  height: auto;
   width: 100%;
-  margin: 0;
-  padding: 2.5rem 3rem;
-  border-radius: 30px;
+  padding: 0;
+  /* inner padding lives in the content wrapper */
+  border-radius: 24px;
   box-sizing: border-box;
 
-  /* visual style */
-background:
-  radial-gradient(circle at top left,
-    rgba(255, 0, 153, 0.26),
-    transparent 55%),
-  radial-gradient(circle at bottom right,
-    rgba(64, 140, 255, 0.28),
-    transparent 55%),
-  linear-gradient(
-    135deg,
-    rgba(10, 6, 18, 0.82),
-    rgba(12, 10, 24, 0.80)
-  );
+  /* FIX 1: Opaque base so no card below ever bleeds through */
+  background-color: #07050d;
+  background-image:
+    radial-gradient(circle at top left, rgba(245, 158, 11, 0.12), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.06), transparent 55%);
 
-
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  /* FIX 2: Subtle shadow casts downward AND upward so stacked cards look separated */
   box-shadow:
-    0 18px 45px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.02);
+    0 -12px 32px rgba(0, 0, 0, 0.70),
+    0 20px 48px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.07);
 
-  /* layout so heading is higher in the box */
+  border: 1px solid rgba(255, 255, 255, 0.10);
+
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;   /* content starts near top */
+  justify-content: flex-start;
   align-items: center;
-  gap: 1rem;                     /* space between heading and text */
+  gap: 1rem;
   text-align: center;
 
+  /* FIX 3: transform-origin top-center for the scale-from-top deck effect */
   transform-origin: top center;
-  will-change: transform, filter;
+
+  /* FIX 4: NO will-change here — JS sets it only while actively animating */
   backface-visibility: hidden;
-  transform-style: preserve-3d;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
+  /* FIX 5: flat, not preserve-3d — prevents extra compositor layers on iOS */
+  transform-style: flat;
 }
 
+/* JS sets this class while the card is moving */
+.scroll-stack-card.is-animating {
+  will-change: transform, filter;
+}
 
-
-/* End marker used in JS to know when to release the stack */
 .scroll-stack-end {
   width: 100%;
   height: 1px;
 }
 
-/* Layout inside the card so heading is higher */
 .scroll-stack-card-content {
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;  /* content starts near top */
+  justify-content: center;
   align-items: center;
-  text-align: center; 
-  margin-top: -4rem;
-  padding-top: 0.3rem;         /* extra space above heading */
+  text-align: center;
+  padding-top: 0.3rem;
 }
 
-/* Slightly larger gap below heading text */
 .scroll-stack-card-content h2 {
   margin-top: 0;
   margin-bottom: 0.5rem;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .scroll-stack-inner {
+    padding: 4vh 0 8vh;
+  }
+
+  .scroll-stack-card {
+    min-height: 14rem;
+    border-radius: 18px;
+  }
 }
