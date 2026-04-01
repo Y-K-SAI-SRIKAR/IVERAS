@@ -9,12 +9,11 @@ import random
 import string
 
 # ======================================================
-# LOAD ENV (VERY IMPORTANT)
+# LOAD ENV — local .env only (Vercel injects env vars directly)
 # ======================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ENV_PATH = os.path.join(BASE_DIR, ".env")
-
-load_dotenv(dotenv_path=ENV_PATH)
+load_dotenv(dotenv_path=ENV_PATH, override=False)  # won't override Vercel env vars
 
 # ======================================================
 # INIT APP
@@ -27,16 +26,19 @@ CORS(app)
 # ======================================================
 mongo_uri = os.getenv("MONGO_URI")
 
-print("🔍 Mongo URI:", mongo_uri)  # DEBUG
+mongo = None
+if mongo_uri:
+    app.config["MONGO_URI"] = mongo_uri
+    mongo = PyMongo(app)
+    print("✅ Connected to MongoDB")
+else:
+    print("⚠️  MONGO_URI not set — add it in Vercel Environment Variables")
 
-if not mongo_uri:
-    raise Exception("❌ MONGO_URI not found. Check your .env file location/content")
-
-app.config["MONGO_URI"] = mongo_uri
-
-mongo = PyMongo(app)
-
-print("✅ Connected to MongoDB:", mongo.db.name)
+def require_mongo():
+    """Return a 503 response if MongoDB is not configured."""
+    if mongo is None:
+        return jsonify({"error": "Database not configured. Set MONGO_URI in Vercel Environment Variables."}), 503
+    return None
 
 # ======================================================
 # ROLE → ROUTE MAPPING
@@ -61,6 +63,8 @@ def home():
 # ======================================================
 @app.route("/api/register", methods=["POST"])
 def register():
+    err = require_mongo()
+    if err: return err
     try:
         data = request.get_json()
 
@@ -109,6 +113,8 @@ def register():
 # ======================================================
 @app.route("/api/login", methods=["POST"])
 def login():
+    err = require_mongo()
+    if err: return err
     try:
         data = request.get_json()
 
@@ -148,6 +154,8 @@ def login():
 # ======================================================
 @app.route("/api/user/<user_id>", methods=["GET"])
 def get_user(user_id):
+    err = require_mongo()
+    if err: return err
     try:
         user = mongo.db.users.find_one({"userId": user_id})
 
