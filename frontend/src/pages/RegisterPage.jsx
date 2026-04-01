@@ -736,7 +736,7 @@ function UserFlow({ role, onSuccess }) {
     } else {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:5000/api/register", {
+        const res = await fetch("/api/register", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: form.name, email: form.email, password: form.password, userType: "User" })
         });
@@ -934,7 +934,7 @@ function ResponderFlow({ role, onSuccess }) {
     } else {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:5000/api/register", {
+        const res = await fetch("/api/register", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: form.name, email: form.email, password: "ResponderPassword123", userType: "Responder" })
         });
@@ -1042,7 +1042,7 @@ function HospitalFlow({ role, onSuccess }) {
     } else {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:5000/api/register", {
+        const res = await fetch("/api/register", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: "Hospital Admin", email: "admin@hospital.com", password: "HospitalPassword123", userType: "Hospital" })
         });
@@ -1177,7 +1177,7 @@ function PatientFlow({ role, onSuccess }) {
     } else {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:5000/api/register", {
+        const res = await fetch("/api/register", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: "Patient Name", email: "patient@example.com", password: "PatientPassword123", userType: "Patient" })
         });
