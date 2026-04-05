@@ -24,7 +24,7 @@ genai.configure(api_key=api_key)
 from agent import INSTRUCTION_TEXT
 
 model = genai.GenerativeModel(
-    'gemini-3-flash-preview',
+    'gemini-3.0-flash-preview',
     system_instruction=INSTRUCTION_TEXT
 )
 

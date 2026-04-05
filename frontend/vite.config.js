@@ -11,6 +11,16 @@ export default defineConfig({
     port: 5554,
     allowedHosts: ['marcelina-uncomprehensive-hyun.ngrok-free.dev'], // 👈 add this
     proxy: {
+      '/api/chat': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/health': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
