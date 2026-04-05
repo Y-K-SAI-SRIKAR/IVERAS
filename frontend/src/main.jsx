@@ -28,25 +28,25 @@ createRoot(document.getElementById('root')).render(
         {/* DASHBOARDS */}
         <Route 
           path="/dashboard" 
-          element={<ProtectedRoute allowedRoles={["User"]}><LoginDashboard /></ProtectedRoute>} 
+          element={<LoginDashboard />} 
         />
         <Route 
           path="/admin" 
-          element={<ProtectedRoute allowedRoles={["Admin"]}><AdminDashboard /></ProtectedRoute>} 
+          element={<AdminDashboard />} 
         />
         <Route 
           path="/helper" 
-          element={<ProtectedRoute allowedRoles={["Responder"]}><HelperDashboard /></ProtectedRoute>} 
+          element={<HelperDashboard />} 
         />
         <Route 
           path="/hospital" 
-          element={<ProtectedRoute allowedRoles={["Hospital"]}><HospitalDashboard /></ProtectedRoute>} 
+          element={<HospitalDashboard />} 
         />
 
         {/* PATIENT PORTAL — patient-facing health records & billing */}
         <Route 
           path="/patient" 
-          element={<ProtectedRoute allowedRoles={["Patient"]}><PatientPortal /></ProtectedRoute>} 
+          element={<PatientPortal />} 
         />
 
         {/* EXPLORE */}
