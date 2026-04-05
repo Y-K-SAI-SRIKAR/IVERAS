@@ -10,7 +10,7 @@
  * ✅ 6. Women Safety — Fake UI masking + background SOS + live tracking card
  */
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 /* ════════════════════════════════════════════════════
@@ -100,24 +100,7 @@ const RAIL_STEPS = [
   { state: SYS.AT_HOSPITAL, label: "Hospital", icon: "🏥" },
 ];
 
-/* ════════════════════════════════════════════════════
-   STATIC DATA
-════════════════════════════════════════════════════ */
-const localUser = (() => { try { return JSON.parse(localStorage.getItem('user')) || {}; } catch(e) { return {}; } })();
-const userName = localUser.name || "User";
-const userInitials = userName.split(" ").map(n => n[0]).join("").substring(0,2).toUpperCase() || "U";
-
-const USER = {
-  name: userName, initials: userInitials,
-  uid: localUser.userId || "NexVitals-USR-29048",
-  vehicle: "TS 09 EZ 4821", model: "Honda CB350 · 2-Wheeler",
-  hw: [
-    { label: "System", val: "Active", color: "#22c55e" },
-    { label: "GPS", val: "Locked", color: "#22c55e" },
-    { label: "Sensors", val: "Online", color: "#22c55e" },
-    { label: "Network", val: "4G", color: "#fbbf24" },
-  ],
-};
+// Dynamic user data is fetched inside the UserDashboard component
 const MEDICAL = { blood: "B+", conditions: "Mild Hypertension", allergies: "Penicillin", emergency: "+91 98765 43210 (Meera)" };
 const MOCK_MECHANICS = [
   { name: "Ravi Auto Works", type: "Car Repair", phone: "+919844011223", distance: "1.2 km" },
@@ -1564,6 +1547,30 @@ function HoldToCancelButton({ onConfirmCancel }) {
 ════════════════════════════════════════════════════ */
 export default function UserDashboard() {
   const navigate = useNavigate();
+
+  const USER = useMemo(() => {
+    let _localUser = {};
+    try {
+      _localUser = JSON.parse(localStorage.getItem('user')) || {};
+    } catch(e) {}
+    
+    const userName = _localUser.name || "User";
+    const userInitials = userName.split(" ").map(n => n[0]).join("").substring(0,2).toUpperCase() || "U";
+    
+    return {
+      name: userName, 
+      initials: userInitials,
+      uid: _localUser.userId || "NexVitals-USR-29048",
+      vehicle: "TS 09 EZ 4821", 
+      model: "Honda CB350 · 2-Wheeler",
+      hw: [
+        { label: "System", val: "Active", color: "#22c55e" },
+        { label: "GPS", val: "Locked", color: "#22c55e" },
+        { label: "Sensors", val: "Online", color: "#22c55e" },
+        { label: "Network", val: "4G", color: "#fbbf24" },
+      ],
+    };
+  }, []);
 
   const [sysState, setSysState] = useState(SYS.NORMAL);
   const [location, setLocation] = useState({ lat: 16.4307, lng: 80.6480 });
