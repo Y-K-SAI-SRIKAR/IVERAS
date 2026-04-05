@@ -1,12 +1,12 @@
-
 from flask import Flask, request, jsonify
-from flask_pymongo import PyMongo
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import os
 import random
 import string
+import boto3
+from boto3.dynamodb.conditions import Attr
 
 # ======================================================
 # LOAD ENV — local .env only (Vercel injects env vars directly)
@@ -22,22 +22,30 @@ app = Flask(__name__)
 CORS(app)
 
 # ======================================================
-# MONGODB CONNECTION
+# DYNAMODB CONNECTION
 # ======================================================
-mongo_uri = os.getenv("MONGO_URI")
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_REGION = os.getenv("AWS_REGION", "ap-south-1")
+DYNAMODB_TABLE_NAME = os.getenv("DYNAMODB_TABLE_NAME", "NexVitals-Users")
 
-mongo = None
-if mongo_uri:
-    app.config["MONGO_URI"] = mongo_uri
-    mongo = PyMongo(app)
-    print("✅ Connected to MongoDB")
-else:
-    print("⚠️  MONGO_URI not set — add it in Vercel Environment Variables")
+try:
+    dynamodb = boto3.resource(
+        'dynamodb',
+        region_name=AWS_REGION,
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+    )
+    users_table = dynamodb.Table(DYNAMODB_TABLE_NAME)
+    print("✅ Connected to AWS DynamoDB")
+except Exception as e:
+    users_table = None
+    print(f"⚠️  Error connecting to DynamoDB: {e}")
 
-def require_mongo():
-    """Return a 503 response if MongoDB is not configured."""
-    if mongo is None:
-        return jsonify({"error": "Database not configured. Set MONGO_URI in Vercel Environment Variables."}), 503
+def require_db():
+    """Return a 503 response if DynamoDB is not configured."""
+    if users_table is None:
+        return jsonify({"error": "Database not configured properly."}), 503
     return None
 
 # ======================================================
@@ -63,7 +71,7 @@ def home():
 # ======================================================
 @app.route("/api/register", methods=["POST"])
 def register():
-    err = require_mongo()
+    err = require_db()
     if err: return err
     try:
         data = request.get_json()
@@ -80,7 +88,9 @@ def register():
             return jsonify({"error": "Missing required fields"}), 400
 
         # Check existing user
-        if mongo.db.users.find_one({"email": email}):
+        # Note: Partition key is specified as 'eamil'
+        response = users_table.get_item(Key={"eamil": email})
+        if "Item" in response:
             return jsonify({"error": "User already exists"}), 400
 
         # Hash password
@@ -90,10 +100,10 @@ def register():
         user_id = "IVR-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
         # Save user
-        mongo.db.users.insert_one({
+        users_table.put_item(Item={
+            "eamil": email, # Partition key
             "userId": user_id,
             "name": name,
-            "email": email,
             "password": hashed_password,
             "userType": user_type
         })
@@ -113,7 +123,7 @@ def register():
 # ======================================================
 @app.route("/api/login", methods=["POST"])
 def login():
-    err = require_mongo()
+    err = require_db()
     if err: return err
     try:
         data = request.get_json()
@@ -127,10 +137,13 @@ def login():
         if not email or not password:
             return jsonify({"error": "Missing email or password"}), 400
 
-        user = mongo.db.users.find_one({"email": email})
-
-        if not user:
+        # Note: Partition key is 'eamil'
+        response = users_table.get_item(Key={"eamil": email})
+        
+        if "Item" not in response:
             return jsonify({"error": "User not found"}), 400
+            
+        user = response["Item"]
 
         if not check_password_hash(user["password"], password):
             return jsonify({"error": "Wrong password"}), 400
@@ -141,7 +154,7 @@ def login():
             "message": "Login successful",
             "userId": user.get("userId"),
             "name": user.get("name"),
-            "email": user.get("email"),
+            "email": user.get("eamil"), # Send back as 'email' for the frontend
             "userType": user_type,
             "redirectUrl": ROLE_ROUTES.get(user_type, "/dashboard")
         }), 200
@@ -154,17 +167,24 @@ def login():
 # ======================================================
 @app.route("/api/user/<user_id>", methods=["GET"])
 def get_user(user_id):
-    err = require_mongo()
+    err = require_db()
     if err: return err
     try:
-        user = mongo.db.users.find_one({"userId": user_id})
-
-        if not user:
+        # Since userId is not the partition key, we need to scan the table
+        response = users_table.scan(
+            FilterExpression=Attr('userId').eq(user_id)
+        )
+        
+        if not response.get("Items"):
             return jsonify({"error": "User not found"}), 404
+            
+        user = response["Items"][0]
 
-        user["_id"] = str(user["_id"])
+        # Cleanup data before sending to frontend
         user.pop("password", None)
-
+        if "eamil" in user:
+            user["email"] = user.pop("eamil") # Rename back to standard term
+            
         return jsonify(user), 200
 
     except Exception as e:
@@ -187,3 +207,4 @@ def protected():
 # ======================================================
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
+

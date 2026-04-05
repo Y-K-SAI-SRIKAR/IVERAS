@@ -1,10 +1,9 @@
 Flask
-Flask-PyMongo
 Flask-Cors
 python-dotenv
 Werkzeug
-pymongo
 requests
 Pillow
 gunicorn
 google-generativeai
+boto3
