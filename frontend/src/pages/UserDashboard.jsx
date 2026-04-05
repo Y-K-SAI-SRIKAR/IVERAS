@@ -103,9 +103,13 @@ const RAIL_STEPS = [
 /* ════════════════════════════════════════════════════
    STATIC DATA
 ════════════════════════════════════════════════════ */
+const localUser = (() => { try { return JSON.parse(localStorage.getItem('user')) || {}; } catch(e) { return {}; } })();
+const userName = localUser.name || "User";
+const userInitials = userName.split(" ").map(n => n[0]).join("").substring(0,2).toUpperCase() || "U";
+
 const USER = {
-  name: "Sreenivasan V.R.", initials: "SR",
-  uid: "NexVitals-USR-29048",
+  name: userName, initials: userInitials,
+  uid: localUser.userId || "NexVitals-USR-29048",
   vehicle: "TS 09 EZ 4821", model: "Honda CB350 · 2-Wheeler",
   hw: [
     { label: "System", val: "Active", color: "#22c55e" },

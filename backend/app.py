@@ -111,6 +111,8 @@ def register():
         return jsonify({
             "message": "Registration successful",
             "userId": user_id,
+            "name": name,
+            "email": email,
             "userType": user_type,
             "redirectUrl": ROLE_ROUTES.get(user_type, "/dashboard")
         }), 200
