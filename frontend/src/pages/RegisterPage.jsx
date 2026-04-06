@@ -949,7 +949,16 @@ function ResponderFlow({ role, onSuccess }) {
       try {
         const res = await fetch("/api/register", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: form.name, email: form.email, password: "ResponderPassword123", userType: "Responder" })
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            password: form.mobile || form.name.replace(/\s+/g,"").toLowerCase() + "Nexv!2025",
+            userType: "Responder",
+            phone: form.mobile || "",
+            badge: form.badge || "",
+            responderType: responderType || "",
+            agency: form.agency || "",
+          })
         });
         const data = await res.json();
         setLoading(false);
@@ -1055,9 +1064,23 @@ function HospitalFlow({ role, onSuccess }) {
     } else {
       setLoading(true);
       try {
+  // NOTE: Hospital fields come from step 0 inputs (not in controlled state yet — collect from DOM)
+        const hospName = document.querySelector(".rp-input[placeholder='Care Hospital, Vijayawada']")?.value || "Hospital";
+        const adminEmail = document.querySelector(".rp-input[type='email'][placeholder='admin@carehospital.in']")?.value || "admin@hospital.com";
+        const adminName  = document.querySelector(".rp-input[placeholder='Dr. Priya Sharma']")?.value || "Hospital Admin";
+        const adminPhone = document.querySelector(".rp-input[type='tel']")?.value || "";
+        const regNum     = document.querySelector(".rp-input[placeholder='AP-HOS-2019-00482']")?.value || "";
         const res = await fetch("/api/register", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: "Hospital Admin", email: "admin@hospital.com", password: "HospitalPassword123", userType: "Hospital" })
+          body: JSON.stringify({
+            name: adminName,
+            email: adminEmail,
+            password: "HospAdmin@NexV2025",
+            userType: "Hospital",
+            phone: adminPhone,
+            hospitalName: hospName,
+            hospitalReg: regNum,
+          })
         });
         const data = await res.json();
         setLoading(false);
@@ -1192,7 +1215,14 @@ function PatientFlow({ role, onSuccess }) {
       try {
         const res = await fetch("/api/register", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: "Patient Name", email: "patient@example.com", password: "PatientPassword123", userType: "Patient" })
+          body: JSON.stringify({
+            name: patientForm.name || "Patient",
+            email: patientForm.email || "patient@nexvitals.in",
+            password: patientForm.password || "Patient@NexV2025",
+            userType: "Patient",
+            mrn: patientForm.mrn || "",
+            phone: patientForm.phone || "",
+          })
         });
         const data = await res.json();
         setLoading(false);

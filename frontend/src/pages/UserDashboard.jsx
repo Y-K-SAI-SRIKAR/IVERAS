@@ -2081,10 +2081,14 @@ export default function UserDashboard() {
                 <div className="card-body">
                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                     <div className="avatar">{USER.initials}</div>
-                    <div>
+                    <div style={{ flex: 1 }}>
                       <div className="prof-name">{USER.name}</div>
                       <div className="prof-uid">{USER.uid}</div>
                     </div>
+                    <button
+                      onClick={() => setActiveModal("editProfile")}
+                      style={{ background: "rgba(251,191,36,0.1)", border: "1px solid rgba(251,191,36,0.3)", color: "var(--amber)", fontFamily: "var(--fm)", fontSize: ".5rem", fontWeight: 700, letterSpacing: "1.5px", padding: "5px 10px", borderRadius: 6, cursor: "pointer", flexShrink: 0 }}
+                    >✏ EDIT</button>
                   </div>
                   <div style={{ background: "var(--s2)", borderRadius: 7, padding: "10px 12px", border: "1px solid var(--line)", marginBottom: 12 }}>
                     <div style={{ fontFamily: "var(--fm)", fontSize: ".52rem", fontWeight: 700, letterSpacing: "2px", color: "var(--t45)", textTransform: "uppercase", marginBottom: 5 }}>Vehicle</div>
@@ -2332,6 +2336,112 @@ export default function UserDashboard() {
         <select className="modal-input" style={{ appearance: "none", cursor: "pointer" }}><option>Service Type</option><option>Car Repair</option><option>Bike Repair</option><option>Puncture Shop</option></select>
         <button className="modal-btn" style={{ background: "rgba(34,197,94,0.12)", borderColor: "rgba(34,197,94,0.35)", color: "#22c55e" }} onClick={() => { addToast({ title: "Mechanic Submitted", message: "Entry sent for admin review.", color: "#22c55e" }); setActiveModal(null); }}>Submit for Verification</button>
       </Modal>
+
+      {/* ── EDIT PROFILE MODAL ── */}
+      <EditProfileModal
+        isOpen={activeModal === "editProfile"}
+        onClose={() => setActiveModal(null)}
+        currentProfile={userProfile}
+        onSave={(updated) => {
+          const merged = { ...userProfile, ...updated };
+          localStorage.setItem("user", JSON.stringify(merged));
+          setUserProfile(merged);
+          addToast({ title: "Profile Updated", message: "Blood group, conditions & contacts saved.", color: "#22c55e" });
+          setActiveModal(null);
+        }}
+      />
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════
+   EDIT PROFILE MODAL
+════════════════════════════════════════════════════ */
+function EditProfileModal({ isOpen, onClose, currentProfile, onSave }) {
+  const [form, setForm] = React.useState({});
+  const [saving, setSaving] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setForm({
+        blood:      currentProfile.blood      || "",
+        conditions: currentProfile.conditions || "",
+        allergies:  currentProfile.allergies  || "",
+        emergency1: currentProfile.emergency1 || "",
+        emergency2: currentProfile.emergency2 || "",
+        phone:      currentProfile.phone      || "",
+        vehicle:    currentProfile.vehicle    || "",
+        vehicleType:currentProfile.vehicleType|| "",
+      });
+    }
+  }, [isOpen, currentProfile]);
+
+  const fld = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const userId = currentProfile.userId;
+      if (userId) {
+        await fetch(`/api/user/${userId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+      }
+      onSave(form);
+    } catch (e) {
+      // Still update locally even if network fails
+      onSave(form);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  const inp = { background: "var(--s2)", border: "1px solid var(--line2)", borderRadius: 8, padding: "10px 12px", color: "var(--white)", fontFamily: "var(--fb)", fontSize: ".85rem", outline: "none", width: "100%", marginBottom: 10 };
+  const lbl = { fontFamily: "var(--fm)", fontSize: ".52rem", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "var(--t45)", display: "block", marginBottom: 5 };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 999, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div style={{ background: "var(--s1)", border: "1px solid var(--amber-b)", borderRadius: 16, width: "100%", maxWidth: 420, maxHeight: "90vh", overflowY: "auto", padding: 28, position: "relative" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
+          <div style={{ fontFamily: "var(--fd)", fontSize: "1.1rem", fontWeight: 800, color: "var(--white)" }}>✏️ Edit Medical Profile</div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--t45)", fontSize: 18, cursor: "pointer" }}>✕</button>
+        </div>
+
+        <label style={lbl}>Blood Group</label>
+        <select value={form.blood || ""} onChange={e => fld("blood", e.target.value)} style={{ ...inp, appearance: "none", cursor: "pointer" }}>
+          <option value="">Select blood group</option>
+          {["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(b => <option key={b} value={b}>{b}</option>)}
+        </select>
+
+        <label style={lbl}>Phone Number</label>
+        <input style={inp} value={form.phone || ""} onChange={e => fld("phone", e.target.value)} placeholder="+91 99999 00000" />
+
+        <label style={lbl}>Pre-existing Conditions</label>
+        <textarea style={{ ...inp, minHeight: 70, resize: "vertical" }} value={form.conditions || ""} onChange={e => fld("conditions", e.target.value)} placeholder="e.g. Type 2 Diabetes, Hypertension..." />
+
+        <label style={lbl}>Known Allergies</label>
+        <textarea style={{ ...inp, minHeight: 70, resize: "vertical" }} value={form.allergies || ""} onChange={e => fld("allergies", e.target.value)} placeholder="e.g. Penicillin, NSAIDs, Latex..." />
+
+        <label style={lbl}>Emergency Contact 1</label>
+        <input style={inp} value={form.emergency1 || ""} onChange={e => fld("emergency1", e.target.value)} placeholder="Meera Kumar · +91 9999900000" />
+
+        <label style={lbl}>Emergency Contact 2</label>
+        <input style={inp} value={form.emergency2 || ""} onChange={e => fld("emergency2", e.target.value)} placeholder="Arjun Kumar · +91 9999900001 (optional)" />
+
+        <label style={lbl}>Vehicle / Device Serial</label>
+        <input style={inp} value={form.vehicle || ""} onChange={e => fld("vehicle", e.target.value)} placeholder="IVER-XXXX-XXXX or plate number" />
+
+        <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
+          <button onClick={onClose} style={{ flex: 1, padding: 12, borderRadius: 9, border: "1px solid var(--line2)", background: "transparent", color: "var(--t45)", fontFamily: "var(--fm)", fontSize: ".55rem", fontWeight: 700, letterSpacing: "2px", cursor: "pointer" }}>CANCEL</button>
+          <button onClick={handleSave} disabled={saving} style={{ flex: 2, padding: 12, borderRadius: 9, border: "none", background: "var(--amber)", color: "#000", fontFamily: "var(--fm)", fontSize: ".55rem", fontWeight: 800, letterSpacing: "2px", cursor: "pointer" }}>
+            {saving ? "SAVING..." : "SAVE PROFILE"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

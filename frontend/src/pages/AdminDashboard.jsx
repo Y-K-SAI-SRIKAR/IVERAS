@@ -427,6 +427,10 @@ const AmbulancesTab = () => (
 
 /* ─── MAIN APP COMPONENT ──────────────────────────────────────────────────── */
 export default function AdminDashboard() {
+  const adminProfile = (() => { try { return JSON.parse(localStorage.getItem('user')) || {}; } catch { return {}; } })();
+  const adminName = adminProfile.name || 'Admin';
+  const adminId = adminProfile.userId || '';
+
   const [activeTab, setActiveTab] = useState('overview');
 
   const tabs = [

@@ -277,6 +277,13 @@ const LiveStreamBadge = ({ unit, latency }) => {
 
 /* ─── ROOT ────────────────────────────────────────────────────────────────── */
 export default function HospitalOS() {
+    // Load logged-in hospital user profile
+    const [hospitalProfile] = React.useState(() => {
+        try { return JSON.parse(localStorage.getItem("user")) || {}; } catch { return {}; }
+    });
+    const hospitalDisplayName = hospitalProfile.hospitalName || hospitalProfile.name || "City General Hospital";
+    const adminName = hospitalProfile.name || "Hospital Admin";
+
     const [activeView, setActiveView] = useState('floor');
     const [pendingAlloc, setPendingAlloc] = useState(null);
     const [sentInstructions, setSentInstructions] = useState({});
@@ -353,7 +360,7 @@ export default function HospitalOS() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <SBadge label="System Normal" color={DS.green} pulse />
-                        <span style={{ fontSize: 10, color: DS.textDim, fontFamily: "'IBM Plex Mono',monospace" }}>City General Hospital</span>
+                        <span style={{ fontSize: 10, color: DS.textDim, fontFamily: "'IBM Plex Mono',monospace" }}>{hospitalDisplayName}</span>
                     </div>
                 </div>
 

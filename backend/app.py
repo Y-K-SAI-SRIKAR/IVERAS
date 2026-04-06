@@ -99,15 +99,24 @@ def register():
         # Generate ID
         user_id = "IVR-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
-        # Extract optional medical / vehicle profile fields
-        phone      = data.get("phone", "")
-        blood      = data.get("blood", "")
-        conditions = data.get("conditions", "")
-        allergies  = data.get("allergies", "")
-        emergency1 = data.get("emergency1", "")
-        emergency2 = data.get("emergency2", "")
-        vehicle    = data.get("vehicle", "")
+        # Extract ALL optional profile fields for every user type
+        phone        = data.get("phone", "")
+        blood        = data.get("blood", "")
+        conditions   = data.get("conditions", "")
+        allergies    = data.get("allergies", "")
+        emergency1   = data.get("emergency1", "")
+        emergency2   = data.get("emergency2", "")
+        vehicle      = data.get("vehicle", "")
         vehicle_type = data.get("vehicleType", "")
+        # Responder-specific
+        badge         = data.get("badge", "")
+        responder_type = data.get("responderType", "")
+        agency        = data.get("agency", "")
+        # Hospital-specific
+        hospital_name = data.get("hospitalName", "")
+        hospital_reg  = data.get("hospitalReg", "")
+        # Patient-specific
+        mrn           = data.get("mrn", "")
 
         # Save user with full profile
         users_table.put_item(Item={
@@ -124,6 +133,12 @@ def register():
             "emergency2": emergency2,
             "vehicle": vehicle,
             "vehicleType": vehicle_type,
+            "badge": badge,
+            "responderType": responder_type,
+            "agency": agency,
+            "hospitalName": hospital_name,
+            "hospitalReg": hospital_reg,
+            "mrn": mrn,
         })
 
         return jsonify({
@@ -192,6 +207,12 @@ def login():
             "emergency2": user.get("emergency2", ""),
             "vehicle": user.get("vehicle", ""),
             "vehicleType": user.get("vehicleType", ""),
+            "badge": user.get("badge", ""),
+            "responderType": user.get("responderType", ""),
+            "agency": user.get("agency", ""),
+            "hospitalName": user.get("hospitalName", ""),
+            "hospitalReg": user.get("hospitalReg", ""),
+            "mrn": user.get("mrn", ""),
             "redirectUrl": ROLE_ROUTES.get(user_type, "/dashboard")
         }), 200
 
@@ -250,7 +271,8 @@ def update_user(user_id):
 
         # Build update expression for allowed fields only
         ALLOWED = ["name", "phone", "blood", "conditions", "allergies",
-                   "emergency1", "emergency2", "vehicle", "vehicleType"]
+                   "emergency1", "emergency2", "vehicle", "vehicleType",
+                   "badge", "responderType", "agency", "hospitalName", "hospitalReg", "mrn"]
 
         updates = {k: v for k, v in data.items() if k in ALLOWED}
         if not updates:

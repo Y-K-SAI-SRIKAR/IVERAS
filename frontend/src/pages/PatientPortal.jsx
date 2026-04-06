@@ -215,6 +215,11 @@ class ErrorBoundary extends React.Component {
 }
 
 export default function PatientPortal() {
+  const patientProfile = (() => { try { return JSON.parse(localStorage.getItem('user')) || {}; } catch { return {}; } })();
+  const patientName = patientProfile.name || 'Patient';
+  const patientMRN  = patientProfile.mrn || patientProfile.userId || '';
+  const patientBlood = patientProfile.blood || '';
+
     const [session, setSession] = useState(null);
     const [tab, setTab] = useState('overview');
     return (

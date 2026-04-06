@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 // ─── CONSTANTS & MOCK DATA ────────────────────────────────────────────────────
 
@@ -616,8 +616,31 @@ function VitalCard({ name, value, unit, baseline, type }) {
 
 // ─── TOPBAR ──────────────────────────────────────────────────────────────────
 
+function useResponderProfile() {
+  const [profile, setProfile] = React.useState(() => {
+    try { return JSON.parse(localStorage.getItem("user")) || {}; } catch { return {}; }
+  });
+  React.useEffect(() => {
+    const cached = (() => { try { return JSON.parse(localStorage.getItem("user")) || {}; } catch { return {}; } })();
+    const userId = cached.userId;
+    if (!userId) return;
+    fetch(`/api/user/${userId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) {
+          const merged = { ...cached, ...data };
+          localStorage.setItem("user", JSON.stringify(merged));
+          setProfile(merged);
+        }
+      })
+      .catch(() => {});
+  }, []);
+  return profile;
+}
+
 function Topbar({ stage, incidentId }) {
   const time = useClockTick();
+  const responder = useResponderProfile();
   const stageLabels = {
     alert: "INCOMING ALERT",
     mode: "MODE SELECTION",
@@ -635,6 +658,27 @@ function Topbar({ stage, incidentId }) {
         </div>
       </div>
       <div className="topbar-right">
+        {responder.name && (
+          <div style={{ display:"flex", alignItems:"center", gap:8, marginRight:12,
+            background:"rgba(79,172,254,0.08)", border:"1px solid rgba(79,172,254,0.2)",
+            borderRadius:6, padding:"4px 10px" }}>
+            <span style={{ fontFamily:"var(--font-mono)", fontSize:11, color:"var(--blue)" }}>
+              {responder.name}
+            </span>
+            {responder.badge && (
+              <span style={{ fontFamily:"var(--font-mono)", fontSize:10, color:"var(--text-muted)" }}>
+                · {responder.badge}
+              </span>
+            )}
+            {responder.responderType && (
+              <span style={{ fontSize:10, background:"rgba(34,208,122,0.1)", color:"var(--green)",
+                border:"1px solid rgba(34,208,122,0.25)", padding:"1px 6px", borderRadius:3,
+                fontFamily:"var(--font-mono)" }}>
+                {responder.responderType}
+              </span>
+            )}
+          </div>
+        )}
         <div className="topbar-time">{time}</div>
         <div className="status-dot" />
       </div>
