@@ -26,27 +26,27 @@ createRoot(document.getElementById('root')).render(
         <Route path="/register" element={<RegisterPage />} />
 
         {/* DASHBOARDS */}
-        <Route 
-          path="/dashboard" 
-          element={<LoginDashboard />} 
+        <Route
+          path="/dashboard"
+          element={<LoginDashboard />}
         />
-        <Route 
-          path="/admin" 
-          element={<AdminDashboard />} 
+        <Route
+          path="/admin"
+          element={<AdminDashboard />}
         />
-        <Route 
-          path="/helper" 
-          element={<HelperDashboard />} 
+        <Route
+          path="/helper"
+          element={<HelperDashboard />}
         />
-        <Route 
-          path="/hospital" 
-          element={<HospitalDashboard />} 
+        <Route
+          path="/hospital"
+          element={<HospitalDashboard />}
         />
 
         {/* PATIENT PORTAL — patient-facing health records & billing */}
-        <Route 
-          path="/patient" 
-          element={<PatientPortal />} 
+        <Route
+          path="/patient"
+          element={<PatientPortal />}
         />
 
         {/* EXPLORE */}

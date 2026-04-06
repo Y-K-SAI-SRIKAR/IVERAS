@@ -738,7 +738,20 @@ function UserFlow({ role, onSuccess }) {
       try {
         const res = await fetch("/api/register", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: form.name, email: form.email, password: form.password, userType: "User" })
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            password: form.password,
+            userType: "User",
+            phone: form.phone || "",
+            blood: bloodGroup || "",
+            conditions: form.conditions || "",
+            allergies: form.allergies || "",
+            emergency1: form.emergency1 || "",
+            emergency2: form.emergency2 || "",
+            vehicleType: vehicleType || "",
+            vehicle: form.serial || "",
+          })
         });
         const data = await res.json();
         setLoading(false);

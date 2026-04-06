@@ -768,7 +768,7 @@ const STACK_CARDS = [
 // UPDATED: Team with improved role tags
 const TEAM = [
   { name: "Sreenivasan Venkata Raghavan", role: "Founder & Project Lead", specialty: "IoT Systems Lead", photo: "/rags.jpeg", initial: "R", accent: "#f59e0b", tags: ["IoT Systems", "Computer Vision", "Architecture"] },
-  { name: "Yerraguntla Kameswara Sai Srikar", role: "Co-Founder · Cloud & AI", specialty: "AI/ML Lead", photo: "/srikar.png", initial: "S", accent: "#22c55e", tags: ["AI/ML Lead", "Cloud & AWS", "Automation"] },
+  { name: "Yerraguntla Kameswara Sai Srikar", role: "Co-Founder · Cloud & AI", specialty: "AI/ML Lead", photo: "/srikar.png", initial: "S", accent: "#22c55e", tags: ["AI&ML Lead", "Cloud & Devops", "Automation"] },
   { name: "Konduri Lakshmi Prasanna", role: "Co-Founder & Vice Project Lead", specialty: "Frontend Lead", photo: "/prasanna.jpeg", initial: "P", accent: "#3b82f6", tags: ["Frontend Lead", "UX Design", "Workflow"] },
   { name: "Kotagiri Kavya Sri", role: "Co-Founder · Databases & Web", specialty: "Backend Lead", photo: "/kavya.jpeg", initial: "K", accent: "#ec4899", tags: ["Backend Lead", "Database Architecture", "Web Systems"] },
 ];

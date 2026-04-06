@@ -99,13 +99,31 @@ def register():
         # Generate ID
         user_id = "IVR-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
-        # Save user
+        # Extract optional medical / vehicle profile fields
+        phone      = data.get("phone", "")
+        blood      = data.get("blood", "")
+        conditions = data.get("conditions", "")
+        allergies  = data.get("allergies", "")
+        emergency1 = data.get("emergency1", "")
+        emergency2 = data.get("emergency2", "")
+        vehicle    = data.get("vehicle", "")
+        vehicle_type = data.get("vehicleType", "")
+
+        # Save user with full profile
         users_table.put_item(Item={
-            "eamil": email, # Partition key
+            "eamil": email,        # Partition key (intentional typo in DB schema)
             "userId": user_id,
             "name": name,
             "password": hashed_password,
-            "userType": user_type
+            "userType": user_type,
+            "phone": phone,
+            "blood": blood,
+            "conditions": conditions,
+            "allergies": allergies,
+            "emergency1": emergency1,
+            "emergency2": emergency2,
+            "vehicle": vehicle,
+            "vehicleType": vehicle_type,
         })
 
         return jsonify({
@@ -114,6 +132,14 @@ def register():
             "name": name,
             "email": email,
             "userType": user_type,
+            "phone": phone,
+            "blood": blood,
+            "conditions": conditions,
+            "allergies": allergies,
+            "emergency1": emergency1,
+            "emergency2": emergency2,
+            "vehicle": vehicle,
+            "vehicleType": vehicle_type,
             "redirectUrl": ROLE_ROUTES.get(user_type, "/dashboard")
         }), 200
 
@@ -156,8 +182,16 @@ def login():
             "message": "Login successful",
             "userId": user.get("userId"),
             "name": user.get("name"),
-            "email": user.get("eamil"), # Send back as 'email' for the frontend
+            "email": user.get("eamil"),   # Send back as 'email' for the frontend
             "userType": user_type,
+            "phone": user.get("phone", ""),
+            "blood": user.get("blood", ""),
+            "conditions": user.get("conditions", ""),
+            "allergies": user.get("allergies", ""),
+            "emergency1": user.get("emergency1", ""),
+            "emergency2": user.get("emergency2", ""),
+            "vehicle": user.get("vehicle", ""),
+            "vehicleType": user.get("vehicleType", ""),
             "redirectUrl": ROLE_ROUTES.get(user_type, "/dashboard")
         }), 200
 
@@ -185,9 +219,61 @@ def get_user(user_id):
         # Cleanup data before sending to frontend
         user.pop("password", None)
         if "eamil" in user:
-            user["email"] = user.pop("eamil") # Rename back to standard term
-            
+            user["email"] = user.pop("eamil")  # Rename back to standard term
+
         return jsonify(user), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ======================================================
+# UPDATE USER PROFILE
+# ======================================================
+@app.route("/api/user/<user_id>", methods=["PATCH"])
+def update_user(user_id):
+    err = require_db()
+    if err: return err
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data received"}), 400
+
+        # Find the user by userId (scan since partition key is email)
+        response = users_table.scan(
+            FilterExpression=Attr('userId').eq(user_id)
+        )
+        if not response.get("Items"):
+            return jsonify({"error": "User not found"}), 404
+
+        user = response["Items"][0]
+        email = user["eamil"]
+
+        # Build update expression for allowed fields only
+        ALLOWED = ["name", "phone", "blood", "conditions", "allergies",
+                   "emergency1", "emergency2", "vehicle", "vehicleType"]
+
+        updates = {k: v for k, v in data.items() if k in ALLOWED}
+        if not updates:
+            return jsonify({"error": "No valid fields to update"}), 400
+
+        expr_parts = []
+        expr_values = {}
+        expr_names = {}
+        for i, (k, v) in enumerate(updates.items()):
+            placeholder = f":v{i}"
+            name_placeholder = f"#n{i}"
+            expr_parts.append(f"{name_placeholder} = {placeholder}")
+            expr_values[placeholder] = v
+            expr_names[name_placeholder] = k
+
+        users_table.update_item(
+            Key={"eamil": email},
+            UpdateExpression="SET " + ", ".join(expr_parts),
+            ExpressionAttributeValues=expr_values,
+            ExpressionAttributeNames=expr_names,
+        )
+
+        return jsonify({"message": "Profile updated successfully"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

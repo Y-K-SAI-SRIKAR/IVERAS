@@ -1548,29 +1548,72 @@ function HoldToCancelButton({ onConfirmCancel }) {
 export default function UserDashboard() {
   const navigate = useNavigate();
 
-  const USER = useMemo(() => {
-    let _localUser = {};
+  // ── Dynamic user profile from DynamoDB ──────────────────────────────────
+  const [userProfile, setUserProfile] = useState(() => {
+    // Seed from localStorage immediately so UI isn't blank on first render
     try {
-      _localUser = JSON.parse(localStorage.getItem('user')) || {};
-    } catch(e) {}
-    
-    const userName = _localUser.name || "User";
-    const userInitials = userName.split(" ").map(n => n[0]).join("").substring(0,2).toUpperCase() || "U";
-    
+      const cached = JSON.parse(localStorage.getItem("user")) || {};
+      return cached;
+    } catch { return {}; }
+  });
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState(null);
+
+  useEffect(() => {
+    const cached = (() => {
+      try { return JSON.parse(localStorage.getItem("user")) || {}; } catch { return {}; }
+    })();
+    const userId = cached.userId;
+    if (!userId) return;
+
+    setProfileLoading(true);
+    fetch(`/api/user/${userId}`)
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(data => {
+        // Merge fresh data into localStorage so it stays up-to-date
+        const merged = { ...cached, ...data };
+        localStorage.setItem("user", JSON.stringify(merged));
+        setUserProfile(merged);
+      })
+      .catch(err => {
+        console.warn("Could not refresh profile from server:", err.message);
+        setProfileError(err.message);
+        // Fall back to cached data — already set in initial state
+      })
+      .finally(() => setProfileLoading(false));
+  }, []);
+
+  // Derived USER object — updates whenever userProfile changes
+  const USER = useMemo(() => {
+    const userName = userProfile.name || "User";
+    const userInitials = userName.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() || "U";
+    const vehicleLabel = userProfile.vehicle || "—";
+    const vehicleType  = userProfile.vehicleType || "2-Wheeler";
+
     return {
-      name: userName, 
+      name: userName,
       initials: userInitials,
-      uid: _localUser.userId || "NexVitals-USR-29048",
-      vehicle: "TS 09 EZ 4821", 
-      model: "Honda CB350 · 2-Wheeler",
+      uid: userProfile.userId || "NexVitals-USR-00000",
+      vehicle: vehicleLabel,
+      model: vehicleType,
+      email: userProfile.email || "",
+      phone: userProfile.phone || "",
+      blood: userProfile.blood || "",
+      conditions: userProfile.conditions || "",
+      allergies: userProfile.allergies || "",
+      emergency1: userProfile.emergency1 || "",
+      emergency2: userProfile.emergency2 || "",
       hw: [
-        { label: "System", val: "Active", color: "#22c55e" },
-        { label: "GPS", val: "Locked", color: "#22c55e" },
-        { label: "Sensors", val: "Online", color: "#22c55e" },
-        { label: "Network", val: "4G", color: "#fbbf24" },
+        { label: "System",  val: "Active",  color: "#22c55e" },
+        { label: "GPS",     val: "Locked",  color: "#22c55e" },
+        { label: "Sensors", val: "Online",  color: "#22c55e" },
+        { label: "Network", val: "4G",      color: "#fbbf24" },
       ],
     };
-  }, []);
+  }, [userProfile]);
 
   const [sysState, setSysState] = useState(SYS.NORMAL);
   const [location, setLocation] = useState({ lat: 16.4307, lng: 80.6480 });
@@ -2069,10 +2112,10 @@ export default function UserDashboard() {
                 </div>
                 <div className="card-body">
                   <div className="med-row">
-                    <div className="med-item"><div className="med-key">Blood Group</div><div className="blood">{MEDICAL.blood}</div></div>
-                    <div className="med-item"><div className="med-key">Conditions</div><div className="med-val">{MEDICAL.conditions}</div></div>
-                    <div className="med-item"><div className="med-key">Allergies</div><div className="med-val" style={{ color: "#fbbf24" }}>{MEDICAL.allergies}</div></div>
-                    <div className="med-item" style={{ borderBottom: "none", paddingBottom: 0 }}><div className="med-key">Emergency</div><div className="med-val" style={{ fontSize: ".74rem" }}>{MEDICAL.emergency}</div></div>
+                    <div className="med-item"><div className="med-key">Blood Group</div><div className="blood">{USER.blood || <span style={{color:"var(--t45)",fontSize:".78rem"}}>Not set</span>}</div></div>
+                    <div className="med-item"><div className="med-key">Conditions</div><div className="med-val">{USER.conditions || "None listed"}</div></div>
+                    <div className="med-item"><div className="med-key">Allergies</div><div className="med-val" style={{ color: "#fbbf24" }}>{USER.allergies || "None listed"}</div></div>
+                    <div className="med-item" style={{ borderBottom: "none", paddingBottom: 0 }}><div className="med-key">Emergency</div><div className="med-val" style={{ fontSize: ".74rem" }}>{USER.emergency1 || "Not set"}</div></div>
                   </div>
                 </div>
               </div>
