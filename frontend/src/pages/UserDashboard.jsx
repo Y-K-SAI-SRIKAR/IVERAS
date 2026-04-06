@@ -1591,7 +1591,7 @@ export default function UserDashboard() {
     const userName = userProfile.name || "User";
     const userInitials = userName.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() || "U";
     const vehicleLabel = userProfile.vehicle || "—";
-    const vehicleType  = userProfile.vehicleType || "2-Wheeler";
+    const vehicleType = userProfile.vehicleType || "2-Wheeler";
 
     return {
       name: userName,
@@ -1607,10 +1607,10 @@ export default function UserDashboard() {
       emergency1: userProfile.emergency1 || "",
       emergency2: userProfile.emergency2 || "",
       hw: [
-        { label: "System",  val: "Active",  color: "#22c55e" },
-        { label: "GPS",     val: "Locked",  color: "#22c55e" },
-        { label: "Sensors", val: "Online",  color: "#22c55e" },
-        { label: "Network", val: "4G",      color: "#fbbf24" },
+        { label: "System", val: "Active", color: "#22c55e" },
+        { label: "GPS", val: "Locked", color: "#22c55e" },
+        { label: "Sensors", val: "Online", color: "#22c55e" },
+        { label: "Network", val: "4G", color: "#fbbf24" },
       ],
     };
   }, [userProfile]);
@@ -2116,7 +2116,7 @@ export default function UserDashboard() {
                 </div>
                 <div className="card-body">
                   <div className="med-row">
-                    <div className="med-item"><div className="med-key">Blood Group</div><div className="blood">{USER.blood || <span style={{color:"var(--t45)",fontSize:".78rem"}}>Not set</span>}</div></div>
+                    <div className="med-item"><div className="med-key">Blood Group</div><div className="blood">{USER.blood || <span style={{ color: "var(--t45)", fontSize: ".78rem" }}>Not set</span>}</div></div>
                     <div className="med-item"><div className="med-key">Conditions</div><div className="med-val">{USER.conditions || "None listed"}</div></div>
                     <div className="med-item"><div className="med-key">Allergies</div><div className="med-val" style={{ color: "#fbbf24" }}>{USER.allergies || "None listed"}</div></div>
                     <div className="med-item" style={{ borderBottom: "none", paddingBottom: 0 }}><div className="med-key">Emergency</div><div className="med-val" style={{ fontSize: ".74rem" }}>{USER.emergency1 || "Not set"}</div></div>
@@ -2364,14 +2364,14 @@ function EditProfileModal({ isOpen, onClose, currentProfile, onSave }) {
   React.useEffect(() => {
     if (isOpen) {
       setForm({
-        blood:      currentProfile.blood      || "",
+        blood: currentProfile.blood || "",
         conditions: currentProfile.conditions || "",
-        allergies:  currentProfile.allergies  || "",
+        allergies: currentProfile.allergies || "",
         emergency1: currentProfile.emergency1 || "",
         emergency2: currentProfile.emergency2 || "",
-        phone:      currentProfile.phone      || "",
-        vehicle:    currentProfile.vehicle    || "",
-        vehicleType:currentProfile.vehicleType|| "",
+        phone: currentProfile.phone || "",
+        vehicle: currentProfile.vehicle || "",
+        vehicleType: currentProfile.vehicleType || "",
       });
     }
   }, [isOpen, currentProfile]);
@@ -2414,7 +2414,7 @@ function EditProfileModal({ isOpen, onClose, currentProfile, onSave }) {
         <label style={lbl}>Blood Group</label>
         <select value={form.blood || ""} onChange={e => fld("blood", e.target.value)} style={{ ...inp, appearance: "none", cursor: "pointer" }}>
           <option value="">Select blood group</option>
-          {["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(b => <option key={b} value={b}>{b}</option>)}
+          {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(b => <option key={b} value={b}>{b}</option>)}
         </select>
 
         <label style={lbl}>Phone Number</label>
